@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline: "Newsreader", serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  --color-primary: #ae3115;
+  --color-primary-container: #ff6b4a;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #661000;
+  
+  --color-secondary: #914a3a;
+  --color-secondary-container: #ffa490;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #793728;
+
+  --color-tertiary: #006a69;
+  --color-tertiary-container: #00acab;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #003939;
+
+  --color-surface: #fdf8f5;
+  --color-background: #fdf8f5;
+  --color-on-surface: #1c1b1a;
+  --color-on-surface-variant: #59413c;
+  
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f8f3f0;
+  --color-surface-container: #f2edea;
+  --color-surface-container-high: #ece7e4;
+  --color-surface-container-highest: #e6e2df;
+  
+  --color-outline: #8d716a;
+  --color-outline-variant: #e1bfb8;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+  body {
+    @apply bg-background text-on-surface font-body;
+  }
+}
+
+@layer components {
+  .editorial-shadow {
+    box-shadow: 0 8px 32px -4px rgba(28, 27, 26, 0.05);
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

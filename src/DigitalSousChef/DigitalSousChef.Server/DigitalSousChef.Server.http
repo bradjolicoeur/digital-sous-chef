@@ -1,0 +1,6 @@
+@DigitalSousChef.Server_HostAddress = http://localhost:5001
+
+GET {{DigitalSousChef.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="DigitalSousChef.AppHost/DigitalSousChef.AppHost.csproj" />
+  <Project Path="digitalsouschef.client/digitalsouschef.client.esproj">
+    <Build />
+  </Project>
+  <Project Path="DigitalSousChef.Server/DigitalSousChef.Server.csproj" />
+  <Project Path="DigitalSousChef.ServiceDefaults/DigitalSousChef.ServiceDefaults.csproj" />
+</Solution>
