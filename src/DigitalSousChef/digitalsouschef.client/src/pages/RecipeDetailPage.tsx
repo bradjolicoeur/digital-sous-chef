@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Timer, Flame, Users, Heart, Share2, ShoppingBasket, Utensils } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Timer, Flame, Users, Heart, Share2, ShoppingBasket, Utensils, Pencil } from 'lucide-react';
 import { getRecipe, toggleFavorite } from '../api/recipes';
 import { addItemsBulk } from '../api/grocery';
 import type { Recipe } from '../types';
 
 const RecipeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
@@ -50,12 +51,18 @@ const RecipeDetailPage = () => {
         {/* Left — Hero Image */}
         <div className="md:col-span-5 lg:col-span-6 relative">
           <div className="relative h-[512px] md:h-[calc(100vh-120px)] w-full overflow-hidden md:rounded-r-3xl md:mt-4">
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
+            {recipe.imageUrl ? (
+              <img
+                src={recipe.imageUrl}
+                alt={recipe.title}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-full h-full bg-surface-container-high flex items-center justify-center">
+                <span className="text-6xl font-headline italic text-outline/40">{recipe.title.charAt(0)}</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
             <div className="absolute top-4 right-4 flex flex-col gap-3 md:hidden">
               <button
@@ -63,6 +70,12 @@ const RecipeDetailPage = () => {
                 className="w-10 h-10 bg-surface/90 backdrop-blur-md rounded-full flex items-center justify-center text-primary shadow-lg"
               >
                 <Heart size={20} className={recipe.isFavorite ? 'fill-primary' : ''} />
+              </button>
+              <button
+                onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
+                className="w-10 h-10 bg-surface/90 backdrop-blur-md rounded-full flex items-center justify-center text-on-surface shadow-lg"
+              >
+                <Pencil size={20} />
               </button>
               <button className="w-10 h-10 bg-surface/90 backdrop-blur-md rounded-full flex items-center justify-center text-on-surface shadow-lg">
                 <Share2 size={20} />
@@ -181,10 +194,17 @@ const RecipeDetailPage = () => {
           </div>
 
           {/* Desktop action buttons */}
-          <div className="hidden md:flex gap-4 mt-16">
+          <div className="hidden md:flex gap-4 mt-16 flex-wrap">
             <button className="px-8 py-4 bg-primary text-on-primary rounded-full font-semibold flex items-center gap-2 hover:bg-primary-container transition-all active:scale-95 shadow-lg">
               <Utensils size={20} />
               Start Cooking Now
+            </button>
+            <button
+              onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
+              className="px-8 py-4 border border-outline-variant text-on-surface rounded-full font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-all"
+            >
+              <Pencil size={20} />
+              Edit Recipe
             </button>
             <button className="px-8 py-4 border border-outline-variant text-on-surface rounded-full font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-all">
               <Share2 size={20} />

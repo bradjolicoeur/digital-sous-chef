@@ -8,6 +8,7 @@ import AuthGuard from './auth/AuthGuard';
 import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
+import RecipeEditPage from './pages/RecipeEditPage';
 import PlannerPage from './pages/PlannerPage';
 import GroceryListPage from './pages/GroceryListPage';
 
@@ -18,7 +19,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const { isLoggedIn } = useFusionAuth();
   const showSidebar = SIDEBAR_ROUTES.some(r => location.pathname.startsWith(r));
-  const isRecipeDetail = location.pathname.startsWith('/recipe/');
+  const isRecipeDetail = location.pathname.startsWith('/recipe/') || location.pathname.startsWith('/recipes/new');
 
   // After FusionAuth redirects back, navigate to the originally requested page
   useEffect(() => {
@@ -45,6 +46,8 @@ function AppLayout() {
             <Route path="/" element={<HomePage />} />
             <Route path="/gallery" element={<AuthGuard><GalleryPage /></AuthGuard>} />
             <Route path="/recipe/:id" element={<AuthGuard><RecipeDetailPage /></AuthGuard>} />
+            <Route path="/recipe/:id/edit" element={<AuthGuard><RecipeEditPage /></AuthGuard>} />
+            <Route path="/recipes/new" element={<AuthGuard><RecipeEditPage /></AuthGuard>} />
             <Route path="/planner" element={<AuthGuard><PlannerPage /></AuthGuard>} />
             <Route path="/grocery" element={<AuthGuard><GroceryListPage /></AuthGuard>} />
           </Routes>

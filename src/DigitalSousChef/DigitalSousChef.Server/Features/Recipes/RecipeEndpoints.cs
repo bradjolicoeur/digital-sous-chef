@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 
@@ -5,6 +6,26 @@ namespace DigitalSousChef.Server.Features.Recipes;
 
 public static class RecipeEndpoints
 {
+    [WolverinePost("/api/recipes")]
+    public static async Task<IResult> CreateRecipe(
+        CreateRecipeCommand cmd,
+        IMessageBus bus)
+    {
+        var recipe = await bus.InvokeAsync<Recipe>(cmd);
+        return Results.Created($"/api/recipes/{recipe.Id}", recipe);
+    }
+
+    [WolverinePut("/api/recipes/{id}")]
+    public static async Task<IResult> UpdateRecipe(
+        Guid id,
+        [FromBody] UpdateRecipeCommand cmd,
+        IMessageBus bus)
+    {
+        var merged = cmd with { Id = id };
+        var recipe = await bus.InvokeAsync<Recipe?>(merged);
+        return recipe is null ? Results.NotFound() : Results.Ok(recipe);
+    }
+
     [WolverinePost("/api/recipes/import")]
     public static async Task<IResult> ImportRecipe(
         ImportRecipeCommand cmd,

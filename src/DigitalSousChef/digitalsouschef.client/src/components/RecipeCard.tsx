@@ -9,6 +9,15 @@ interface RecipeCardProps {
   onFavorite?: (id: string) => void;
 }
 
+const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className: string }) =>
+  src ? (
+    <img src={src} alt={alt} className={className} referrerPolicy="no-referrer" />
+  ) : (
+    <div className={cn(className, 'bg-surface-container-high flex items-center justify-center')}>
+      <span className="text-4xl font-headline italic text-outline/40">{alt.charAt(0)}</span>
+    </div>
+  );
+
 const RecipeCard = ({ recipe, variant = 'default', onFavorite }: RecipeCardProps) => {
   if (variant === 'featured') {
     return (
@@ -17,11 +26,10 @@ const RecipeCard = ({ recipe, variant = 'default', onFavorite }: RecipeCardProps
         className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-xl bg-surface-container-lowest editorial-shadow"
       >
         <div className="aspect-[4/5] overflow-hidden">
-          <img
+          <ImageWithFallback
             src={recipe.imageUrl}
             alt={recipe.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            referrerPolicy="no-referrer"
           />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
@@ -46,11 +54,10 @@ const RecipeCard = ({ recipe, variant = 'default', onFavorite }: RecipeCardProps
     return (
       <Link to={`/recipe/${recipe.id}`} className="group">
         <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-4 relative">
-          <img
+          <ImageWithFallback
             src={recipe.imageUrl}
             alt={recipe.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            referrerPolicy="no-referrer"
           />
           <button
             onClick={(e) => { e.preventDefault(); onFavorite?.(recipe.id); }}
@@ -74,11 +81,10 @@ const RecipeCard = ({ recipe, variant = 'default', onFavorite }: RecipeCardProps
       className="group bg-surface-container-lowest rounded-xl overflow-hidden hover:editorial-shadow transition-all duration-300 flex flex-col h-full border border-outline-variant/5"
     >
       <div className="aspect-[4/3] relative overflow-hidden">
-        <img
+        <ImageWithFallback
           src={recipe.imageUrl}
           alt={recipe.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          referrerPolicy="no-referrer"
         />
       </div>
       <div className="p-6 space-y-3 flex-grow">

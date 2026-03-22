@@ -36,7 +36,7 @@ const TopNavBar = () => {
         </div>
 
         <div className="flex items-center space-x-4 text-primary">
-          <Link to="/" className="hover:bg-surface-container-low p-2 rounded-full transition-colors">
+          <Link to="/recipes/new" className="hover:bg-surface-container-low p-2 rounded-full transition-colors" title="Add new recipe">
             <Plus size={24} />
           </Link>
           <button className="hover:bg-surface-container-low p-2 rounded-full transition-colors">

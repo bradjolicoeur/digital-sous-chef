@@ -45,3 +45,25 @@ export async function deleteRecipe(id: string): Promise<void> {
   });
   if (!res.ok) throw new Error(await res.text());
 }
+
+export async function createRecipe(data: Omit<Recipe, 'id' | 'importedAt' | 'isFavorite'>): Promise<Recipe> {
+  const res = await fetch(BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateRecipe(id: string, data: Omit<Recipe, 'id' | 'importedAt' | 'isFavorite'>): Promise<Recipe> {
+  const res = await fetch(`${BASE}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
