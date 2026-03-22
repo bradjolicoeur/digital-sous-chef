@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
-import { createRecipe, getRecipe, updateRecipe } from '../api/recipes';
+import { createRecipe, deleteRecipe, getRecipe, updateRecipe } from '../api/recipes';
 import type { Difficulty, Ingredient, InstructionStep } from '../types';
 import { CATEGORIES } from '../lib/categories';
 
@@ -37,6 +37,8 @@ const RecipeEditPage = () => {
   const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -122,6 +124,21 @@ const RecipeEditPage = () => {
       setError(err instanceof Error ? err.message : 'Save failed.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteRecipe(id);
+      navigate('/gallery');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed.');
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -410,8 +427,59 @@ const RecipeEditPage = () => {
           >
             Cancel
           </button>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="ml-auto px-8 py-4 border border-error/40 text-error rounded-full font-semibold flex items-center gap-2 hover:bg-error/10 transition-all"
+            >
+              <Trash2 size={18} />
+              Delete Recipe
+            </button>
+          )}
         </div>
       </form>
+
+      {/* Delete confirmation dialog */}
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={e => { if (e.target === e.currentTarget) setShowDeleteConfirm(false); }}
+          onKeyDown={e => { if (e.key === 'Escape') setShowDeleteConfirm(false); }}
+          role="presentation"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="bg-surface rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4 space-y-6"
+          >
+            <h2 id="delete-dialog-title" className="text-xl font-headline font-semibold text-on-surface">Delete Recipe?</h2>
+            <p className="text-on-surface-variant text-sm leading-relaxed">
+              This will permanently remove <span className="font-medium text-on-surface">{form.title || 'this recipe'}</span>. This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-6 py-3 border border-outline-variant text-on-surface rounded-full font-semibold hover:bg-surface-container-low transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-6 py-3 bg-error text-on-error rounded-full font-semibold flex items-center gap-2 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+              >
+                <Trash2 size={16} />
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
