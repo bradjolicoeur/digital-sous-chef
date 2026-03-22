@@ -9,36 +9,32 @@ const GalleryPage = () => {
   const { category } = useParams<{ category?: string }>();
   const [recipes, setRecipes] = useState<RecipeSummary[]>([]);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All Recipes');
   const [loading, setLoading] = useState(true);
 
+  // Debounce search input — fires 400ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch from server on category or debounced search change
   useEffect(() => {
     setLoading(true);
-    getRecipes({ category }).then(setRecipes).finally(() => setLoading(false));
-  }, [category]);
+    getRecipes({ category, search: debouncedSearch || undefined })
+      .then(setRecipes)
+      .finally(() => setLoading(false));
+  }, [category, debouncedSearch]);
 
+  // Tag/quick-meal filtering stays client-side
   const filtered = useMemo(() => {
-    let result = recipes;
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter(r =>
-        r.title.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q) ||
-        r.category.toLowerCase().includes(q) ||
-        r.tags.some(t => t.toLowerCase().includes(q))
-      );
-    }
-    if (activeFilter !== 'All Recipes') {
-      result = result.filter(r =>
-        r.tags.some(t => t.toLowerCase() === activeFilter.toLowerCase()) ||
-        (activeFilter === 'Quick Meals' && r.prepTime.includes('min'))
-      );
-    }
-    return result;
-  }, [recipes, search, activeFilter]);
-
-  const featuredRecipe = filtered[0];
-  const otherRecipes = filtered.slice(1);
+    if (activeFilter === 'All Recipes') return recipes;
+    return recipes.filter(r =>
+      r.tags.some(t => t.toLowerCase() === activeFilter.toLowerCase()) ||
+      (activeFilter === 'Quick Meals' && r.prepTime.includes('min'))
+    );
+  }, [recipes, activeFilter]);
 
   const handleFavorite = async (id: string) => {
     const updated = await toggleFavorite(id);
@@ -77,28 +73,15 @@ const GalleryPage = () => {
         <div className="text-center py-20 text-on-surface-variant">Loading recipes...</div>
       ) : (
         <>
-          {featuredRecipe && (
-            <section className="mb-24">
+          <section className="pb-32">
+            {(category || debouncedSearch) && (
               <div className="flex items-end justify-between mb-8">
-                <div>
-                  <span className="text-primary font-bold tracking-widest text-[10px] uppercase block mb-2">Curated Selection</span>
-                  <h2 className="font-headline text-3xl text-on-surface">Recently Added</h2>
-                </div>
+                <p className="text-sm text-on-surface-variant">{filtered.length} recipe{filtered.length !== 1 ? 's' : ''} found</p>
                 <Link to="/gallery" className="text-primary font-medium text-sm flex items-center gap-1 group">
                   View All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <RecipeCard recipe={featuredRecipe} variant="featured" onFavorite={handleFavorite} />
-                {otherRecipes.slice(0, 3).map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} onFavorite={handleFavorite} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="pb-32">
+            )}
             <div className="flex items-center gap-4 mb-12 overflow-x-auto pb-4 no-scrollbar lg:hidden">
               {filters.map(f => (
                 <button
@@ -115,9 +98,9 @@ const GalleryPage = () => {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filtered.map(recipe => (
-                <RecipeCard key={recipe.id} recipe={recipe} variant="gallery" onFavorite={handleFavorite} />
+                <RecipeCard key={recipe.id} recipe={recipe} onFavorite={handleFavorite} />
               ))}
             </div>
 

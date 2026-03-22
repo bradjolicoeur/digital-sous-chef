@@ -1,4 +1,5 @@
 using DigitalSousChef.Server.Features.Auth;
+using DigitalSousChef.Server.Features.Recipes;
 using DigitalSousChef.Server.Features.Services;
 using Marten;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -58,6 +59,8 @@ builder.AddNpgsqlDataSource("marten");
 builder.Services.AddMarten(opts =>
 {
     opts.DatabaseSchemaName = "souschef";
+    opts.Schema.For<Recipe>()
+        .FullTextIndex(x => x.Title, x => x.Description, x => x.Category);
 })
 .UseLightweightSessions()
 .UseNpgsqlDataSource()

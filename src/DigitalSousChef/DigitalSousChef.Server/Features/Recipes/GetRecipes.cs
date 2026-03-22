@@ -19,7 +19,10 @@ public class GetRecipesHandler
             q = q.Where(r => r.Category.Equals(query.Category, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrWhiteSpace(query.Search))
-            q = q.Where(r => r.Title.Contains(query.Search, StringComparison.OrdinalIgnoreCase));
+            q = q.Where(r =>
+                r.Title.Contains(query.Search, StringComparison.OrdinalIgnoreCase) ||
+                r.Description.Contains(query.Search, StringComparison.OrdinalIgnoreCase) ||
+                r.Category.Contains(query.Search, StringComparison.OrdinalIgnoreCase));
 
         var recipes = await q.OrderByDescending(r => r.ImportedAt).ToListAsync();
 
