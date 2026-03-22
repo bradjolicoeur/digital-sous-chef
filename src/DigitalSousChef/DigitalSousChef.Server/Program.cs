@@ -68,15 +68,7 @@ builder.Services.AddMarten(opts =>
 
 // App services
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<IAIRecipeExtractor, SchemaOrgRecipeExtractor>()
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        // Auto-decompress gzip/deflate/br so we can parse HTML even when
-        // the server sends compressed content after seeing a browser UA.
-        AutomaticDecompression = System.Net.DecompressionMethods.All,
-        AllowAutoRedirect = true,
-        MaxAutomaticRedirections = 5,
-    });
+builder.Services.AddSingleton<IAIRecipeExtractor, PlaywrightRecipeExtractor>();
 builder.Services.AddSingleton<IIngredientCategoriser, IngredientCategoriser>();
 
 builder.Services.AddOpenApi();
