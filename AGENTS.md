@@ -2,6 +2,97 @@
 
 This repository is set up to use Aspire. Aspire is an orchestrator for the entire application and will take care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `apphost.cs` including application code and external dependencies.
 
+## Starting up for local development
+
+Follow these steps at the beginning of every issue or task before making any changes.
+
+### Prerequisites
+
+Before running the application, ensure:
+- **Docker Desktop** is running — PostgreSQL and FusionAuth run as containers
+- **.NET 10 SDK** is installed (`dotnet --version`)
+- **Node.js** is installed (`node --version`)
+- The `aspire` CLI is available (`aspire --version`)
+
+### Step 1 — Start the Aspire host
+
+Run the following command from the repository root:
+
+```
+aspire run
+```
+
+If prompted to stop an existing instance, confirm. Wait for all resources to reach a running state before proceeding. This typically takes 30–60 seconds on first boot (longer when Docker images need to be pulled).
+
+### Step 2 — Verify all resources are healthy
+
+Use the _list resources_ MCP tool to confirm each resource is in the `Running` state:
+
+| Resource | Type | Notes |
+|---|---|---|
+| `postgres` | Container | PostgreSQL database |
+| `fusionauth-app` | Container | Auth server on port 9011 |
+| `digitalsouschef-server` | Project | .NET API backend |
+| `digitalsouschef-client` | NpmApp | React frontend at https://localhost:56178 |
+
+If any resource is not `Running`, use the _list console logs_ or _list structured logs_ tool for that resource to diagnose the issue before proceeding.
+
+### Step 3 — Confirm the frontend is reachable
+
+Use the Playwright MCP tool to navigate to the frontend and confirm it loads:
+
+```
+navigate to https://localhost:56178
+```
+
+You should see the Digital Sous-Chef home page. If authentication is required, the app will redirect to FusionAuth.
+
+---
+
+## Validating work after making changes
+
+After implementing a change, validate it using this workflow:
+
+### Backend changes (`.Server` project)
+
+Aspire automatically hot-reloads the backend on file save. If the change does not take effect:
+1. Use _list resources_ to confirm `digitalsouschef-server` is still `Running`
+2. If it crashed, use _list console logs_ for `digitalsouschef-server` to read the error
+3. Fix the error, then use _execute resource command_ → Restart if needed
+
+### Frontend changes (`digitalsouschef.client`)
+
+Vite hot-reloads the frontend automatically. Use Playwright to:
+1. Navigate to the relevant page (use the feature URL from the issue description)
+2. Take a snapshot or screenshot to verify the UI matches expected behaviour
+3. Exercise the feature end-to-end through the browser
+
+### Full validation checklist before marking work done
+
+1. _list resources_ — all resources show `Running`
+2. Use Playwright to navigate to the relevant page and verify the change visually
+3. Exercise any API interactions (create, read, update, delete) through the UI
+4. Check _list structured logs_ for `digitalsouschef-server` to confirm no unexpected errors occurred during testing
+
+### Screenshots for UI issues
+
+**IMPORTANT:** For any issue that involves UI changes, you MUST attach screenshots to the pull request body demonstrating the result. Use the Playwright `take_screenshot` tool to capture the relevant page(s) after validating the change, and embed them in the PR description using markdown image syntax. Include at least one screenshot showing the working feature in its final state. If the issue describes a visual bug, include before/after screenshots where possible.
+
+---
+
+## MCP servers
+
+Two MCP servers are configured in [.vscode/mcp.json](.vscode/mcp.json) and are available to the agent automatically:
+
+| Server | Command | Purpose |
+|---|---|---|
+| `aspire` | `aspire mcp start` | Exposes Aspire dashboard tools: list resources, list logs, list traces, execute resource commands |
+| `playwright` | `npx @playwright/mcp@latest` | Browser automation for functional validation of the frontend |
+
+Both servers start automatically when the agent session begins. Use the Aspire MCP tools to inspect resource state and logs, and the Playwright MCP tools to navigate and validate the UI.
+
+---
+
 ## General recommendations for working with Aspire
 1. Before making any changes always run the apphost using `aspire run` and inspect the state of resources to make sure you are building from a known state.
 1. Changes to the _apphost.cs_ file will require a restart of the application to take effect.
