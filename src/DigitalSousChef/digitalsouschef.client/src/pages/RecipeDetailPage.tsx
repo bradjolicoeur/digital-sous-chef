@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Timer, Flame, Users, Heart, Share2, ShoppingBasket, Utensils, Pencil } from 'lucide-react';
 import { getRecipe, toggleFavorite } from '../api/recipes';
 import { addItemsBulk } from '../api/grocery';
+import { formatIngredient } from '../lib/utils';
 import type { Recipe } from '../types';
 
 const RecipeDetailPage = () => {
@@ -167,7 +168,7 @@ const RecipeDetailPage = () => {
                         className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20"
                       />
                       <span className={`text-sm text-on-surface group-hover:text-primary transition-colors ${checkedIngredients.has(i) ? 'line-through opacity-50' : ''}`}>
-                        {ing.item}
+                        {formatIngredient(ing.item)}
                       </span>
                     </label>
                     {ing.note && <span className="text-xs text-outline italic">{ing.note}</span>}

@@ -110,7 +110,7 @@ internal static partial class RecipeHtmlParser
             {
                 var text = ing.GetString();
                 if (!string.IsNullOrWhiteSpace(text))
-                    ingredients.Add(new Ingredient(WebUtility.HtmlDecode(text), null));
+                    ingredients.Add(new Ingredient(NormalizeIngredientQuantity(WebUtility.HtmlDecode(text)), null));
             }
         if (ingredients.Count == 0)
             ingredients.Add(new Ingredient("See original recipe for ingredients", null));
@@ -249,6 +249,50 @@ internal static partial class RecipeHtmlParser
         return m.Success ? int.Parse(m.Value) : null;
     }
 
+    private static readonly (double Value, string Text)[] CommonFractions =
+    [
+        (1.0/8,  "1/8"),
+        (1.0/4,  "1/4"),
+        (1.0/3,  "1/3"),
+        (3.0/8,  "3/8"),
+        (1.0/2,  "1/2"),
+        (5.0/8,  "5/8"),
+        (2.0/3,  "2/3"),
+        (3.0/4,  "3/4"),
+        (7.0/8,  "7/8"),
+    ];
+
+    /// <summary>
+    /// Converts a leading decimal quantity in an ingredient string to a readable fraction.
+    /// e.g. "0.66666668653488 cup flour" → "2/3 cup flour", "1.5 cups sugar" → "1 1/2 cups sugar".
+    /// </summary>
+    private static string NormalizeIngredientQuantity(string text)
+    {
+        var m = LeadingDecimalNumberRegex().Match(text);
+        if (!m.Success) return text;
+
+        if (!double.TryParse(m.Value, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out double num))
+            return text;
+
+        int whole = (int)Math.Floor(num);
+        double frac = num - whole;
+
+        if (frac < 0.01) return text; // already a whole number, leave as-is
+
+        string? fracStr = null;
+        double bestDiff = 0.02; // tolerance for float imprecision
+        foreach (var (val, str) in CommonFractions)
+        {
+            double diff = Math.Abs(frac - val);
+            if (diff < bestDiff) { bestDiff = diff; fracStr = str; }
+        }
+
+        if (fracStr == null) return text;
+        var prefix = whole > 0 ? $"{whole} {fracStr}" : fracStr;
+        return prefix + text[m.Length..];
+    }
+
     private static string? GetString(JsonElement el, string prop) =>
         el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
@@ -300,6 +344,9 @@ internal static partial class RecipeHtmlParser
 
     [GeneratedRegex(@"^\d+")]
     private static partial Regex LeadingNumberRegex();
+
+    [GeneratedRegex(@"^\d*\.\d+")]
+    private static partial Regex LeadingDecimalNumberRegex();
 
     [GeneratedRegex(@"<title[^>]*>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
     private static partial Regex TitleTagRegex();
