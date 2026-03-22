@@ -40,7 +40,8 @@
             "allowedOrigins": [
               "http://localhost:3000",
               "http://localhost:5173",
-              "https://localhost:5173"
+              "https://localhost:5173",
+              "https://localhost:56178"
             ],
             "debug": false,
             "enabled": true,
@@ -69,15 +70,18 @@
             "authorizedRedirectURLs": [
               "http://localhost:3000",
               "http://localhost:5173",
-              "https://localhost:5173"
+              "https://localhost:5173",
+              "https://localhost:56178",
+              "https://localhost:56178/app/callback"
             ],
             "authorizedOriginURLs": [
               "http://localhost:3000",
               "http://localhost:5173",
-              "https://localhost:5173"
+              "https://localhost:5173",
+              "https://localhost:56178"
             ],
             "clientSecret": "super-secret-secret-that-should-be-regenerated-for-production",
-            "logoutURL": "http://localhost:5173",
+            "logoutURL": "https://localhost:56178",
             "enabledGrants": ["authorization_code", "refresh_token"],
             "clientAuthenticationPolicy": "NotRequiredWhenUsingPKCE",
             "proofKeyForCodeExchangePolicy": "Required",

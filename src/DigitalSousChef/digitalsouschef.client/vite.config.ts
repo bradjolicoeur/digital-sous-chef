@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
@@ -35,10 +36,14 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
 }
 
 const target = env["services__digitalsouschef-server__https__0"] ?? 'https://localhost:7062';
+const fusionAuthUrl = env["services__fusionauth-app__http__0"] ?? 'http://localhost:53374';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [plugin(), tailwindcss()],
+    define: {
+        __FUSIONAUTH_URL__: JSON.stringify(fusionAuthUrl),
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -46,7 +51,11 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weatherforecast': {
+            '^/api': {
+                target,
+                secure: false
+            },
+            '^/app': {
                 target,
                 secure: false
             }

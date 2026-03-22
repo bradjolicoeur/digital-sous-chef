@@ -1,58 +1,58 @@
-import { useEffect, useState } from 'react';
-import './App.css';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useFusionAuth } from '@fusionauth/react-sdk';
+import TopNavBar from './components/TopNavBar';
+import SideNavBar from './components/SideNavBar';
+import BottomNavBar from './components/BottomNavBar';
+import AuthGuard from './auth/AuthGuard';
+import HomePage from './pages/HomePage';
+import GalleryPage from './pages/GalleryPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
+import PlannerPage from './pages/PlannerPage';
+import GroceryListPage from './pages/GroceryListPage';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+const SIDEBAR_ROUTES = ['/gallery', '/planner', '/grocery'];
 
-function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+function AppLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isLoggedIn } = useFusionAuth();
+  const showSidebar = SIDEBAR_ROUTES.some(r => location.pathname.startsWith(r));
+  const isRecipeDetail = location.pathname.startsWith('/recipe/');
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
-
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
-
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
-
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
+  // After FusionAuth redirects back, navigate to the originally requested page
+  useEffect(() => {
+    if (isLoggedIn) {
+      const dest = sessionStorage.getItem('postLoginRedirect');
+      if (dest) {
+        sessionStorage.removeItem('postLoginRedirect');
+        navigate(dest, { replace: true });
+      }
     }
+  }, [isLoggedIn, navigate]);
+
+  return (
+    <div className="min-h-screen bg-surface text-on-surface">
+      <TopNavBar />
+      <div className="flex">
+        {showSidebar && (
+          <div className="hidden lg:block">
+            <SideNavBar />
+          </div>
+        )}
+        <div className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/gallery" element={<AuthGuard><GalleryPage /></AuthGuard>} />
+            <Route path="/recipe/:id" element={<AuthGuard><RecipeDetailPage /></AuthGuard>} />
+            <Route path="/planner" element={<AuthGuard><PlannerPage /></AuthGuard>} />
+            <Route path="/grocery" element={<AuthGuard><GroceryListPage /></AuthGuard>} />
+          </Routes>
+        </div>
+      </div>
+      {!isRecipeDetail && <BottomNavBar />}
+    </div>
+  );
 }
 
-export default App;
+export default AppLayout;

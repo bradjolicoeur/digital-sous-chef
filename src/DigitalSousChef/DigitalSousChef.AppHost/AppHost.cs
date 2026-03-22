@@ -10,7 +10,7 @@ var fusionAuthDb = postgres.AddDatabase("fusionauth");
 var postgresEndpoint = postgres.Resource.PrimaryEndpoint;
 
 var fusionauth = builder.AddContainer("fusionauth-app", "fusionauth/fusionauth-app")
-    .WithHttpEndpoint(targetPort: 9011, name: "http")
+    .WithHttpEndpoint(targetPort: 9011, port: 9011, name: "http")
     .WithEnvironment(ctx =>
     {
         ctx.EnvironmentVariables["DATABASE_URL"] = ReferenceExpression.Create(
@@ -34,8 +34,9 @@ var apiService = builder.AddProject<Projects.DigitalSousChef_Server>("digitalsou
 
 builder.AddNpmApp("digitalsouschef-client", "../digitalsouschef.client", "dev")
     .WithReference(apiService)
+    .WithReference(fusionauth.GetEndpoint("http"))
     .WithEnvironment("BROWSER", "none")
-    .WithHttpsEndpoint(env: "DEV_SERVER_PORT")
+    .WithHttpsEndpoint(port: 56178, env: "DEV_SERVER_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
