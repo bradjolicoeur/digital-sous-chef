@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, Heart, User } from 'lucide-react';
+import { Plus, Heart, User, LogIn, LogOut } from 'lucide-react';
+import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
 
 const TopNavBar = () => {
   const location = useLocation();
+  const { isLoggedIn, startLogin, startLogout, userInfo } = useFusionAuth();
 
   const navLinks = [
     { name: 'Gallery', path: '/gallery' },
@@ -40,9 +42,28 @@ const TopNavBar = () => {
           <button className="hover:bg-surface-container-low p-2 rounded-full transition-colors">
             <Heart size={24} />
           </button>
-          <button className="hover:bg-surface-container-low p-2 rounded-full transition-colors">
-            <User size={24} />
-          </button>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:block text-sm font-medium text-on-surface-variant">
+                {userInfo?.given_name ?? userInfo?.email ?? 'Chef'}
+              </span>
+              <button
+                onClick={() => startLogout()}
+                title="Sign out"
+                className="hover:bg-surface-container-low p-2 rounded-full transition-colors"
+              >
+                <LogOut size={24} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => startLogin()}
+              title="Sign in"
+              className="hover:bg-surface-container-low p-2 rounded-full transition-colors"
+            >
+              <LogIn size={24} />
+            </button>
+          )}
         </div>
       </div>
     </nav>
