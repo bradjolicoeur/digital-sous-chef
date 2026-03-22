@@ -1,17 +1,23 @@
 import { NavLink } from 'react-router-dom';
-import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, Plus } from 'lucide-react';
+import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, Plus, LayoutGrid } from 'lucide-react';
 import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
+import { CATEGORIES } from '../lib/categories';
 
 const SideNavBar = () => {
   const { userInfo } = useFusionAuth();
-  const categories = [
-    { name: 'Breakfast', icon: Coffee, path: '/gallery/breakfast' },
-    { name: 'Lunch', icon: Utensils, path: '/gallery/lunch' },
-    { name: 'Dinner', icon: Moon, path: '/gallery/dinner' },
-    { name: 'Desserts', icon: IceCream, path: '/gallery/desserts' },
-    { name: 'Snacks', icon: Cookie, path: '/gallery/snacks' },
-  ];
+  const categoryIcons: Record<string, React.ElementType> = {
+    Breakfast: Coffee,
+    Lunch: Utensils,
+    Dinner: Moon,
+    Desserts: IceCream,
+    Snacks: Cookie,
+  };
+  const categories = CATEGORIES.map(name => ({
+    name,
+    icon: categoryIcons[name] ?? Utensils,
+    path: `/gallery/${name.toLowerCase()}`,
+  }));
 
   return (
     <aside className="hidden lg:flex flex-col py-8 px-4 h-[calc(100vh-5rem)] w-64 sticky top-20 bg-surface-container-low">
@@ -25,6 +31,19 @@ const SideNavBar = () => {
       </div>
 
       <nav className="flex-1 space-y-2">
+        <NavLink
+          to="/gallery"
+          end
+          className={({ isActive }) => cn(
+            "flex items-center gap-3 px-4 py-3 transition-all font-body text-sm font-medium rounded-r-full",
+            isActive
+              ? "bg-primary/10 text-primary font-bold"
+              : "text-on-surface-variant hover:translate-x-1 hover:text-primary"
+          )}
+        >
+          <LayoutGrid size={18} />
+          <span>All Recipes</span>
+        </NavLink>
         {categories.map((cat) => (
           <NavLink
             key={cat.name}

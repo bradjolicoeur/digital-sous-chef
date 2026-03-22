@@ -50,9 +50,15 @@ const GalleryPage = () => {
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-12 py-12">
       <section className="mb-20">
-        <h1 className="font-headline text-5xl md:text-7xl text-on-surface mb-8 max-w-2xl leading-tight">
-          Find your <span className="italic text-primary font-medium">culinary</span> inspiration.
-        </h1>
+        {category ? (
+          <h1 className="font-headline text-5xl md:text-7xl text-on-surface mb-8 max-w-2xl leading-tight">
+            <span className="italic text-primary font-medium capitalize">{category}</span> recipes.
+          </h1>
+        ) : (
+          <h1 className="font-headline text-5xl md:text-7xl text-on-surface mb-8 max-w-2xl leading-tight">
+            Find your <span className="italic text-primary font-medium">culinary</span> inspiration.
+          </h1>
+        )}
         <div className="relative max-w-3xl">
           <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
             <Search className="text-outline" size={24} />

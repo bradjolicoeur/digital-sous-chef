@@ -18,7 +18,7 @@ function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn } = useFusionAuth();
-  const showSidebar = SIDEBAR_ROUTES.some(r => location.pathname.startsWith(r));
+  const showSidebar = SIDEBAR_ROUTES.some(r => location.pathname === r || location.pathname.startsWith(r + '/'));
   const isRecipeDetail = location.pathname.startsWith('/recipe/') || location.pathname.startsWith('/recipes/new');
 
   // After FusionAuth redirects back, navigate to the originally requested page
@@ -45,6 +45,7 @@ function AppLayout() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/gallery" element={<AuthGuard><GalleryPage /></AuthGuard>} />
+            <Route path="/gallery/:category" element={<AuthGuard><GalleryPage /></AuthGuard>} />
             <Route path="/recipe/:id" element={<AuthGuard><RecipeDetailPage /></AuthGuard>} />
             <Route path="/recipe/:id/edit" element={<AuthGuard><RecipeEditPage /></AuthGuard>} />
             <Route path="/recipes/new" element={<AuthGuard><RecipeEditPage /></AuthGuard>} />

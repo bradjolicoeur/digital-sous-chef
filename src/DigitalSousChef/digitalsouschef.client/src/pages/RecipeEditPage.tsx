@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { createRecipe, getRecipe, updateRecipe } from '../api/recipes';
 import type { Difficulty, Ingredient, InstructionStep } from '../types';
+import { CATEGORIES } from '../lib/categories';
 
 const DIFFICULTIES: Difficulty[] = ['Easy', 'Medium', 'Intermediate', 'Expert'];
 
@@ -174,12 +175,14 @@ const RecipeEditPage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-outline uppercase tracking-widest mb-1">Category</label>
-              <input
+              <select
                 className="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/30 text-on-surface"
                 value={form.category}
                 onChange={e => set('category', e.target.value)}
-                placeholder="e.g. Salads"
-              />
+              >
+                <option value="">— Select a category —</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-outline uppercase tracking-widest mb-1">Difficulty</label>
