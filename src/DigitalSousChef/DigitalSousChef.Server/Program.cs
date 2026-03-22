@@ -68,10 +68,23 @@ builder.Services.AddMarten(opts =>
 
 // App services
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<IAIRecipeExtractor, StubAIRecipeExtractor>();
+builder.Services.AddHttpClient<IAIRecipeExtractor, SchemaOrgRecipeExtractor>()
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        // Auto-decompress gzip/deflate/br so we can parse HTML even when
+        // the server sends compressed content after seeing a browser UA.
+        AutomaticDecompression = System.Net.DecompressionMethods.All,
+        AllowAutoRedirect = true,
+        MaxAutomaticRedirections = 5,
+    });
 builder.Services.AddSingleton<IIngredientCategoriser, IngredientCategoriser>();
 
 builder.Services.AddOpenApi();
+
+// Serialize C# enums as strings in HTTP responses so the frontend receives
+// "Medium" instead of 1, "Easy" instead of 0, etc.
+builder.Services.ConfigureHttpJsonOptions(opts =>
+    opts.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 var app = builder.Build();
 
