@@ -7,6 +7,7 @@ Digital Sous Chef is a recipe management and meal planning app. It uses:
 - **Marten** (PostgreSQL) for document storage and event sourcing
 - **.NET Aspire** for orchestration (AppHost coordinates all services)
 - **React 19 / TypeScript / Vite / Tailwind CSS / React Router v7** frontend
+- **FusionAuth** for authentication (self-hosted via Docker, React SDK on the frontend)
 - **xUnit + Alba** for integration testing (preferred over unit tests)
 
 The mockup in `mockup/` is the design source of truth for UI layout and UX patterns.
@@ -430,6 +431,8 @@ Features/
 | Assertions | `Shouldly` |
 | Aspire orchestration | `Aspire.Hosting.NodeJs` (AppHost) |
 | Service defaults | `DigitalSousChef.ServiceDefaults` (internal) |
+| Auth — React frontend | `@fusionauth/react-sdk` |
+| Auth — .NET backend validation | `Microsoft.AspNetCore.Authentication.JwtBearer` |
 
 ---
 
@@ -439,5 +442,6 @@ Detailed patterns and API references for the key libraries:
 
 - **Wolverine**: `.github/skills/wolverine/SKILL.md` + `references/` subfolder
 - **Marten**: `.github/skills/marten/SKILL.md` + `references/` subfolder
+- **FusionAuth**: `.github/skills/fusionauth/SKILL.md`
 
-Load these when working with Wolverine handlers, Marten event sourcing, projections, or testing patterns.
+Load these when working with Wolverine handlers, Marten event sourcing, projections, testing patterns, or FusionAuth authentication.
