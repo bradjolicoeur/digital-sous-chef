@@ -124,9 +124,23 @@ const RecipeDetailPage = () => {
             {recipe.title}
           </h1>
 
-          <p className="text-lg font-body text-on-surface-variant leading-relaxed mb-12 max-w-xl">
+          <p className={`text-lg font-body text-on-surface-variant leading-relaxed max-w-xl ${recipe.sourceUrl ? 'mb-4' : 'mb-12'}`}>
             {recipe.description}
           </p>
+
+          {recipe.sourceUrl && (
+            <p className="text-xs text-outline mb-12">
+              Source:{' '}
+              <a
+                href={recipe.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline break-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                {recipe.sourceUrl}
+              </a>
+            </p>
+          )}
 
           {/* Mobile stats */}
           <div className="grid grid-cols-3 gap-4 mb-12 md:hidden">
