@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Trash2, ArrowLeft } from 'lucide-react';
-import { createRecipe, deleteRecipe, getRecipe, updateRecipe } from '../api/recipes';
+import { Plus, Trash2, ArrowLeft, Wand2 } from 'lucide-react';
+import { createRecipe, deleteRecipe, getRecipe, normalizeIngredients, updateRecipe } from '../api/recipes';
 import type { Difficulty, Ingredient, InstructionStep } from '../types';
 import { CATEGORIES } from '../lib/categories';
 
@@ -38,6 +38,7 @@ const RecipeEditPage = () => {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [fixingQuantities, setFixingQuantities] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,6 +86,23 @@ const RecipeEditPage = () => {
     setForm(f => ({ ...f, ingredients: [...f.ingredients, { item: '', note: '' }] }));
   const removeIngredient = (i: number) =>
     setForm(f => ({ ...f, ingredients: f.ingredients.filter((_, idx) => idx !== i) }));
+
+  const handleFixQuantities = async () => {
+    setFixingQuantities(true);
+    setError(null);
+    try {
+      const items = form.ingredients.map(i => i.item);
+      const normalized = await normalizeIngredients(items);
+      setForm(f => ({
+        ...f,
+        ingredients: f.ingredients.map((ing, i) => ({ ...ing, item: normalized[i] ?? ing.item })),
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to normalize quantities.');
+    } finally {
+      setFixingQuantities(false);
+    }
+  };
 
   // Instructions
   const updateInstruction = (i: number, field: 'title' | 'text', value: string) =>
@@ -329,7 +347,18 @@ const RecipeEditPage = () => {
 
         {/* Ingredients */}
         <section className="space-y-4">
-          <h2 className="text-lg font-headline font-semibold text-on-surface border-b border-outline-variant pb-2">Ingredients</h2>
+          <div className="flex items-center justify-between border-b border-outline-variant pb-2">
+            <h2 className="text-lg font-headline font-semibold text-on-surface">Ingredients</h2>
+            <button
+              type="button"
+              onClick={handleFixQuantities}
+              disabled={fixingQuantities || form.ingredients.every(i => !i.item.trim())}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/40 text-primary text-sm font-medium hover:bg-primary/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Wand2 size={15} />
+              {fixingQuantities ? 'Fixing…' : 'Fix Quantities'}
+            </button>
+          </div>
           <div className="space-y-3">
             {form.ingredients.map((ing, i) => (
               <div key={i} className="flex gap-3 items-start">

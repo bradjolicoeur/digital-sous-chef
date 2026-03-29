@@ -78,3 +78,15 @@ export async function updateRecipe(id: string, data: Omit<Recipe, 'id' | 'import
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function normalizeIngredients(ingredients: string[]): Promise<string[]> {
+  const res = await fetch(`${BASE}/normalize-ingredients`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ingredients }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const data: { ingredients: string[] } = await res.json();
+  return data.ingredients;
+}

@@ -80,4 +80,13 @@ public static class RecipeEndpoints
         await bus.InvokeAsync(new DeleteRecipeCommand(id));
         return Results.NoContent();
     }
+
+    [WolverinePost("/api/recipes/normalize-ingredients")]
+    public static async Task<IResult> NormalizeIngredients(
+        NormalizeIngredientsCommand cmd,
+        IMessageBus bus)
+    {
+        var result = await bus.InvokeAsync<NormalizeIngredientsResult>(cmd);
+        return Results.Ok(result);
+    }
 }
