@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, LayoutGrid, ScanLine } from 'lucide-react';
+import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, LayoutGrid, ScanLine, Soup } from 'lucide-react';
 import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
 import { CATEGORIES } from '../lib/categories';
@@ -10,13 +10,14 @@ const SideNavBar = () => {
     Breakfast: Coffee,
     Lunch: Utensils,
     Dinner: Moon,
+    'Soup & Salad': Soup,
     Desserts: IceCream,
     Snacks: Cookie,
   };
   const categories = CATEGORIES.map(name => ({
     name,
     icon: categoryIcons[name] ?? Utensils,
-    path: `/gallery/${name.toLowerCase()}`,
+    path: `/gallery/${encodeURIComponent(name.toLowerCase())}`,
   }));
 
   return (
