@@ -129,10 +129,10 @@ const PlannerPage = () => {
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-8">
         <div className="flex-grow space-y-8 overflow-hidden">
           {/* Desktop grid */}
-          <div className="hidden lg:grid grid-cols-7 gap-4">
+          <div className="hidden xl:grid grid-cols-7 gap-4">
             {days.map(day => (
               <div key={day.name} className="text-center pb-4">
                 <p className="font-headline text-lg italic">{day.name}</p>
@@ -196,7 +196,7 @@ const PlannerPage = () => {
           </div>
 
           {/* Mobile stack */}
-          <div className="lg:hidden flex flex-col gap-6">
+          <div className="xl:hidden flex flex-col gap-6">
             {days.map(day => (
               <div key={day.isoDate} className="bg-surface-container-low p-6 rounded-3xl">
                 <div className="flex justify-between items-center mb-4">
@@ -252,7 +252,7 @@ const PlannerPage = () => {
         </div>
 
         {/* Sidebar */}
-        <aside className="lg:w-80 shrink-0">
+        <aside className="xl:w-80 shrink-0">
           <div className="sticky top-28 space-y-6">
             <div className="bg-surface-container-high/40 p-8 rounded-[2rem] backdrop-blur-sm">
               <h2 className="font-headline text-2xl italic mb-6">Daily Thresholds</h2>
