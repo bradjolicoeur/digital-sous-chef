@@ -14,6 +14,18 @@ The mockup in `mockup/` is the design source of truth for UI layout and UX patte
 
 ---
 
+## Applying Backend Code Changes
+
+**IMPORTANT:** Aspire's `resource-restart` does NOT recompile the server — it only re-runs the existing binary. After making any changes to backend (`.Server`) code you MUST:
+
+1. **Stop** the server: use `resource-stop` on `digitalsouschef-server`
+2. **Rebuild**: `dotnet build DigitalSousChef.Server\DigitalSousChef.Server.csproj -q` from `src/DigitalSousChef/`
+3. **Start** the server: use `resource-start` on `digitalsouschef-server`
+
+Frontend (Vite) and AppHost changes hot-reload automatically and do not require this sequence.
+
+---
+
 ## Backend Conventions
 
 ### Wolverine — Command & Query Handling
