@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, Plus, LayoutGrid } from 'lucide-react';
+import { Coffee, Utensils, Moon, IceCream, Cookie, Settings, HelpCircle, LayoutGrid, ScanLine } from 'lucide-react';
 import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
 import { CATEGORIES } from '../lib/categories';
@@ -62,10 +62,13 @@ const SideNavBar = () => {
       </nav>
 
       <div className="mt-auto pt-8 space-y-2 border-t border-outline-variant/20">
-        <button className="w-full bg-primary text-on-primary py-3 rounded-full font-medium text-sm mb-4 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
-          <Plus size={16} />
-          New Collection
-        </button>
+        <NavLink
+          to="/import"
+          className="w-full bg-primary text-on-primary py-3 rounded-full font-medium text-sm mb-4 flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+        >
+          <ScanLine size={16} />
+          Import Recipe
+        </NavLink>
         <NavLink to="/settings" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant text-sm hover:text-primary transition-colors">
           <Settings size={18} />
           <span>Settings</span>

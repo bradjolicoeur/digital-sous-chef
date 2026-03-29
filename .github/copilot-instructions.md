@@ -443,5 +443,6 @@ Detailed patterns and API references for the key libraries:
 - **Wolverine**: `.github/skills/wolverine/SKILL.md` + `references/` subfolder
 - **Marten**: `.github/skills/marten/SKILL.md` + `references/` subfolder
 - **FusionAuth**: `.github/skills/fusionauth/SKILL.md`
+- **Playwright Login**: `.github/skills/playwright-login/SKILL.md`
 
-Load these when working with Wolverine handlers, Marten event sourcing, projections, testing patterns, or FusionAuth authentication.
+Load these when working with Wolverine handlers, Marten event sourcing, projections, testing patterns, FusionAuth authentication, or when logging in via Playwright to validate UI changes.

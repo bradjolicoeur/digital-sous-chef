@@ -11,6 +11,7 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import RecipeEditPage from './pages/RecipeEditPage';
 import PlannerPage from './pages/PlannerPage';
 import GroceryListPage from './pages/GroceryListPage';
+import ImportRecipePage from './pages/ImportRecipePage';
 
 const SIDEBAR_ROUTES = ['/gallery', '/planner', '/grocery'];
 
@@ -51,6 +52,7 @@ function AppLayout() {
             <Route path="/recipes/new" element={<AuthGuard><RecipeEditPage /></AuthGuard>} />
             <Route path="/planner" element={<AuthGuard><PlannerPage /></AuthGuard>} />
             <Route path="/grocery" element={<AuthGuard><GroceryListPage /></AuthGuard>} />
+            <Route path="/import" element={<AuthGuard><ImportRecipePage /></AuthGuard>} />
           </Routes>
         </div>
       </div>
