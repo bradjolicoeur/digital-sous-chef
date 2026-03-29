@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Info, ShoppingBasket, ChevronDown, X } from 'lucide-react';
+import { Plus, Info, ShoppingBasket, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getMealPlan, assignSlot, removeSlot } from '../api/planner';
 import { generateList } from '../api/grocery';
 import RecipePickerModal from '../components/RecipePickerModal';
@@ -35,7 +35,15 @@ const MEAL_TYPES: MealType[] = ['Breakfast', 'Lunch', 'Dinner'];
 
 const PlannerPage = () => {
   const navigate = useNavigate();
-  const [weekStart] = useState(getWeekStartDate);
+  const [weekStart, setWeekStart] = useState(getWeekStartDate);
+
+  const navigateWeek = (delta: number) => {
+    const date = new Date(weekStart + 'T00:00:00');
+    date.setDate(date.getDate() + delta * 7);
+    setWeekStart(date.toISOString().split('T')[0]);
+  };
+
+  const isCurrentWeek = weekStart === getWeekStartDate();
   const [plan, setPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -80,6 +88,9 @@ const PlannerPage = () => {
   const weekStartFormatted = new Date(weekStart + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long', day: 'numeric',
   });
+  const weekEndDate = new Date(weekStart + 'T00:00:00');
+  weekEndDate.setDate(weekEndDate.getDate() + 6);
+  const weekEndFormatted = weekEndDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
   if (loading) {
     return <div className="pt-32 text-center text-on-surface-variant">Loading planner...</div>;
@@ -90,11 +101,31 @@ const PlannerPage = () => {
       <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="max-w-2xl">
           <h1 className="font-headline text-5xl text-on-surface tracking-tight leading-none mb-4">The Weekly Canvas</h1>
-          <p className="font-headline italic text-xl text-on-surface-variant">Design your nourishment for the week of {weekStartFormatted}.</p>
+          <p className="font-headline italic text-xl text-on-surface-variant">Design your nourishment for {weekStartFormatted} – {weekEndFormatted}.</p>
         </div>
-        <div className="flex items-center gap-3 bg-surface-container-low p-1 rounded-full">
-          <button className="px-6 py-2 rounded-full text-sm font-medium bg-surface-container-lowest shadow-sm text-primary">Weekly</button>
-          <button className="px-6 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors">Monthly</button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigateWeek(-1)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors"
+            aria-label="Previous week"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          {!isCurrentWeek && (
+            <button
+              onClick={() => setWeekStart(getWeekStartDate())}
+              className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-surface-container-low hover:bg-surface-container-high text-primary transition-colors"
+            >
+              Today
+            </button>
+          )}
+          <button
+            onClick={() => navigateWeek(1)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors"
+            aria-label="Next week"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
       </header>
 
