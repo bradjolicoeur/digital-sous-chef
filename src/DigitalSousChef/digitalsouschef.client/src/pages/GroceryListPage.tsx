@@ -371,7 +371,7 @@ const GroceryListPage = () => {
                       <select
                         value={item.store ?? ''}
                         onChange={e => handleAssignStore(item, e.target.value)}
-                        className="ml-1 text-xs text-on-surface-variant bg-transparent border-none focus:outline-none cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity max-w-[8rem] min-w-0"
+                        className="ml-1 text-xs text-on-surface-variant bg-transparent border-none focus:outline-none cursor-pointer md:opacity-0 md:group-hover:opacity-100 transition-opacity max-w-[8rem] min-w-0"
                         aria-label="Assign to store"
                       >
                         <option value="">Master List</option>
@@ -380,8 +380,8 @@ const GroceryListPage = () => {
                         ))}
                       </select>
 
-                      {/* Quantity stepper + remove (show on hover) */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                      {/* Quantity stepper + remove (always visible on mobile, hover-only on desktop) */}
+                      <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-auto">
                         <button
                           onClick={() => handleQuantityChange(item, -1)}
                           className="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center"
