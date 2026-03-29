@@ -44,7 +44,7 @@ const GalleryPage = () => {
   const filters = ['All Recipes', 'Vegetarian', 'Gluten-Free', 'Quick Meals'];
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-12 py-12">
+    <div className="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-12">
       <section className="mb-20">
         {category ? (
           <h1 className="font-headline text-5xl md:text-7xl text-on-surface mb-8 max-w-2xl leading-tight">
