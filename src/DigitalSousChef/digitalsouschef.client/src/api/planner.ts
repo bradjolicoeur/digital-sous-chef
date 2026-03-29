@@ -27,9 +27,10 @@ export async function assignSlot(
 export async function removeSlot(
   weekStartDate: string,
   date: string,
-  mealType: MealType
+  mealType: MealType,
+  recipeId: string
 ): Promise<MealPlan> {
-  const qs = new URLSearchParams({ date, mealType });
+  const qs = new URLSearchParams({ date, mealType, recipeId });
   const res = await fetch(`${BASE}/${weekStartDate}/slots?${qs}`, {
     method: 'DELETE',
     credentials: 'include',

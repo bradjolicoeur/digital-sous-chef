@@ -50,12 +50,16 @@ export interface RecipeSummary {
   importedAt: string;
 }
 
-export interface MealSlot {
-  date: string;
-  mealType: MealType;
+export interface MealSlotRecipe {
   recipeId: string;
   recipeTitle: string;
   recipeImageUrl: string;
+}
+
+export interface MealSlot {
+  date: string;
+  mealType: MealType;
+  recipes: MealSlotRecipe[];
 }
 
 export interface MealPlan {

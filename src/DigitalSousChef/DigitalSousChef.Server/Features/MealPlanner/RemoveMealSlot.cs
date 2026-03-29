@@ -2,7 +2,7 @@ using Marten;
 
 namespace DigitalSousChef.Server.Features.MealPlanner;
 
-public record RemoveMealSlotCommand(DateOnly WeekStartDate, DateOnly Date, MealType MealType);
+public record RemoveMealSlotCommand(DateOnly WeekStartDate, DateOnly Date, MealType MealType, Guid RecipeId);
 
 public class RemoveMealSlotHandler
 {
@@ -18,7 +18,13 @@ public class RemoveMealSlotHandler
 
         if (plan is null) return null;
 
-        plan.Slots.RemoveAll(s => s.Date == cmd.Date && s.MealType == cmd.MealType);
+        var slot = plan.Slots.FirstOrDefault(s => s.Date == cmd.Date && s.MealType == cmd.MealType);
+        if (slot is not null)
+        {
+            slot.Recipes.RemoveAll(r => r.RecipeId == cmd.RecipeId);
+            if (slot.Recipes.Count == 0)
+                plan.Slots.Remove(slot);
+        }
 
         session.Store(plan);
         await session.SaveChangesAsync();

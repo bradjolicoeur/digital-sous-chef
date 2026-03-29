@@ -8,12 +8,13 @@ public class MealPlan
     public List<MealSlot> Slots { get; set; } = [];
 }
 
-public record MealSlot(
-    DateOnly Date,
-    MealType MealType,
-    Guid RecipeId,
-    string RecipeTitle,
-    string RecipeImageUrl
-);
+public class MealSlot
+{
+    public DateOnly Date { get; set; }
+    public MealType MealType { get; set; }
+    public List<MealSlotRecipe> Recipes { get; set; } = [];
+}
+
+public record MealSlotRecipe(Guid RecipeId, string RecipeTitle, string RecipeImageUrl);
 
 public enum MealType { Breakfast, Lunch, Dinner }

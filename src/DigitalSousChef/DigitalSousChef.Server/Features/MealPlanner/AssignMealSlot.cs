@@ -36,16 +36,17 @@ public class AssignMealSlotHandler
         if (recipe is null || recipe.UserId != userId)
             throw new InvalidOperationException("Recipe not found");
 
-        // Remove existing slot for this date/meal type
-        plan.Slots.RemoveAll(s => s.Date == cmd.Date && s.MealType == cmd.MealType);
+        var slot = plan.Slots.FirstOrDefault(s => s.Date == cmd.Date && s.MealType == cmd.MealType);
+        if (slot is null)
+        {
+            slot = new MealSlot { Date = cmd.Date, MealType = cmd.MealType };
+            plan.Slots.Add(slot);
+        }
 
-        plan.Slots.Add(new MealSlot(
-            cmd.Date,
-            cmd.MealType,
-            recipe.Id,
-            recipe.Title,
-            recipe.ImageUrl
-        ));
+        if (!slot.Recipes.Any(r => r.RecipeId == cmd.RecipeId))
+        {
+            slot.Recipes.Add(new MealSlotRecipe(recipe.Id, recipe.Title, recipe.ImageUrl));
+        }
 
         session.Store(plan);
         await session.SaveChangesAsync();

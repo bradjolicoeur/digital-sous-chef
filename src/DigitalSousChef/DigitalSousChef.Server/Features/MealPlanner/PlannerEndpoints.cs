@@ -30,9 +30,10 @@ public static class PlannerEndpoints
         DateOnly weekStartDate,
         DateOnly date,
         MealType mealType,
+        Guid recipeId,
         IMessageBus bus)
     {
-        var plan = await bus.InvokeAsync<MealPlan?>(new RemoveMealSlotCommand(weekStartDate, date, mealType));
+        var plan = await bus.InvokeAsync<MealPlan?>(new RemoveMealSlotCommand(weekStartDate, date, mealType, recipeId));
         return plan is null ? Results.NotFound() : Results.Ok(plan);
     }
 }

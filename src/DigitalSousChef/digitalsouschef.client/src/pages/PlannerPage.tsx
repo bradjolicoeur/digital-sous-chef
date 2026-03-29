@@ -4,7 +4,7 @@ import { Plus, Info, ShoppingBasket, ChevronDown, X } from 'lucide-react';
 import { getMealPlan, assignSlot, removeSlot } from '../api/planner';
 import { generateList } from '../api/grocery';
 import RecipePickerModal from '../components/RecipePickerModal';
-import type { MealPlan, MealType, MealSlot, RecipeSummary } from '../types';
+import type { MealPlan, MealType, MealSlot, MealSlotRecipe, RecipeSummary } from '../types';
 
 function getWeekStartDate(): string {
   const today = new Date();
@@ -64,8 +64,8 @@ const PlannerPage = () => {
     setPlan(updated);
   };
 
-  const handleRemoveSlot = async (date: string, mealType: MealType) => {
-    const updated = await removeSlot(weekStart, date, mealType);
+  const handleRemoveRecipe = async (date: string, mealType: MealType, recipeId: string) => {
+    const updated = await removeSlot(weekStart, date, mealType, recipeId);
     setPlan(updated);
   };
 
@@ -118,30 +118,42 @@ const PlannerPage = () => {
                   return (
                     <div
                       key={mealType}
-                      className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 shadow-sm min-h-[140px] flex flex-col group cursor-pointer hover:editorial-shadow transition-all"
-                      onClick={() => !slot && handleOpenPicker(day.isoDate, mealType)}
+                      className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 shadow-sm min-h-[140px] flex flex-col group"
                     >
                       <span className={`text-[10px] font-bold uppercase tracking-tighter ${mealColor} mb-2 block`}>{mealType}</span>
-                      {slot ? (
-                        <div className="flex-grow relative">
+                      {slot && (slot.recipes?.length ?? 0) > 0 ? (
+                        <div className="flex-grow flex flex-col gap-1.5">
+                          {(slot.recipes ?? []).map((recipe: MealSlotRecipe) => (
+                            <div key={recipe.recipeId} className="relative flex items-center gap-1.5 bg-surface-container-low rounded-lg p-1.5">
+                              {recipe.recipeImageUrl && (
+                                <img
+                                  className="w-10 h-10 object-cover rounded-md shrink-0"
+                                  src={recipe.recipeImageUrl}
+                                  alt={recipe.recipeTitle}
+                                  referrerPolicy="no-referrer"
+                                />
+                              )}
+                              <h4 className="text-[9px] font-bold line-clamp-2 flex-1">{recipe.recipeTitle}</h4>
+                              <button
+                                onClick={() => handleRemoveRecipe(day.isoDate, mealType, recipe.recipeId)}
+                                className="w-4 h-4 bg-surface rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm shrink-0"
+                              >
+                                <X size={8} className="text-on-surface-variant" />
+                              </button>
+                            </div>
+                          ))}
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleRemoveSlot(day.isoDate, mealType); }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-surface rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10"
+                            onClick={() => handleOpenPicker(day.isoDate, mealType)}
+                            className="mt-auto flex items-center justify-center gap-1 text-primary/30 hover:text-primary py-1 transition-colors"
                           >
-                            <X size={10} className="text-on-surface-variant" />
+                            <Plus size={14} />
                           </button>
-                          {slot.recipeImageUrl && (
-                            <img
-                              className="w-full h-20 object-cover rounded-lg mb-2"
-                              src={slot.recipeImageUrl}
-                              alt={slot.recipeTitle}
-                              referrerPolicy="no-referrer"
-                            />
-                          )}
-                          <h4 className="text-[10px] font-bold line-clamp-2">{slot.recipeTitle}</h4>
                         </div>
                       ) : (
-                        <div className="flex-grow flex items-center justify-center text-primary/30 group-hover:text-primary">
+                        <div
+                          className="flex-grow flex items-center justify-center text-primary/30 hover:text-primary cursor-pointer transition-colors"
+                          onClick={() => handleOpenPicker(day.isoDate, mealType)}
+                        >
                           <Plus size={24} />
                         </div>
                       )}
@@ -166,18 +178,27 @@ const PlannerPage = () => {
                 <div className="space-y-3">
                   {MEAL_TYPES.map(mealType => {
                     const slot = getSlot(day.isoDate, mealType);
-                    if (slot) {
+                    if (slot && (slot.recipes?.length ?? 0) > 0) {
                       return (
-                        <div key={mealType} className="bg-surface-container-lowest p-4 rounded-2xl flex items-center gap-4">
-                          {slot.recipeImageUrl && (
-                            <img className="w-16 h-16 object-cover rounded-xl" src={slot.recipeImageUrl} alt={slot.recipeTitle} referrerPolicy="no-referrer" />
-                          )}
-                          <div className="flex-1">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-tertiary">{mealType}</span>
-                            <p className="font-medium text-sm">{slot.recipeTitle}</p>
-                          </div>
-                          <button onClick={() => handleRemoveSlot(day.isoDate, mealType)} className="p-1">
-                            <X size={16} className="text-on-surface-variant" />
+                        <div key={mealType} className="bg-surface-container-lowest p-4 rounded-2xl space-y-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-tertiary block">{mealType}</span>
+                          {(slot.recipes ?? []).map((recipe: MealSlotRecipe) => (
+                            <div key={recipe.recipeId} className="flex items-center gap-4">
+                              {recipe.recipeImageUrl && (
+                                <img className="w-12 h-12 object-cover rounded-xl shrink-0" src={recipe.recipeImageUrl} alt={recipe.recipeTitle} referrerPolicy="no-referrer" />
+                              )}
+                              <p className="font-medium text-sm flex-1">{recipe.recipeTitle}</p>
+                              <button onClick={() => handleRemoveRecipe(day.isoDate, mealType, recipe.recipeId)} className="p-1">
+                                <X size={14} className="text-on-surface-variant" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => handleOpenPicker(day.isoDate, mealType)}
+                            className="w-full flex items-center justify-center gap-2 text-primary/50 hover:text-primary py-1 transition-colors"
+                          >
+                            <Plus size={14} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Add another</span>
                           </button>
                         </div>
                       );

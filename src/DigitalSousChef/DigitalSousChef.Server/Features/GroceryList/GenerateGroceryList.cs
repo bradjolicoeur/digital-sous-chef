@@ -21,7 +21,9 @@ public class GenerateGroceryListHandler
         var plan = await session.Query<MealPlan>()
             .FirstOrDefaultAsync(p => p.UserId == userId && p.WeekStartDate == cmd.WeekStartDate);
 
-        var recipeIds = plan?.Slots.Select(s => s.RecipeId).Distinct().ToList() ?? [];
+        var recipeIds = plan?.Slots
+            .SelectMany(s => s.Recipes.Select(r => r.RecipeId))
+            .Distinct().ToList() ?? [];
 
         var recipes = recipeIds.Count > 0
             ? await session.Query<Recipe>()
