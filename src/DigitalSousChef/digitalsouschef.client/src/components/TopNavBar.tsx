@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, Heart, User, LogIn, LogOut } from 'lucide-react';
+import { Plus, User, LogIn, LogOut } from 'lucide-react';
 import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
 
@@ -39,9 +39,6 @@ const TopNavBar = () => {
           <Link to="/recipes/new" className="hover:bg-surface-container-low p-2 rounded-full transition-colors" title="Add new recipe">
             <Plus size={24} />
           </Link>
-          <button className="hover:bg-surface-container-low p-2 rounded-full transition-colors">
-            <Heart size={24} />
-          </button>
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
               <span className="hidden sm:block text-sm font-medium text-on-surface-variant">
