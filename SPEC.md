@@ -145,6 +145,7 @@ public class GroceryItem
     public string? Note { get; set; }
     public int Quantity { get; set; } = 1;
     public string Category { get; set; } = "";      // Produce | Dairy & Chilled | Pantry | Meat | Seafood | Other
+    public string? Store { get; set; }              // null = Unassigned (Master list), otherwise store name e.g. "Costco"
     public bool IsPurchased { get; set; }
     public Guid? SourceRecipeId { get; set; }       // null for manually-added items
 }
@@ -298,30 +299,40 @@ Show a spinner inside the **Scan URL** button and disable the input while the im
 
 **Page:** `/grocery`
 
-**Purpose:** Manage a shopping list — auto-generated from the meal plan or manually edited.
+**Purpose:** Manage shopping lists by organising auto-generated or manual items into store-specific lists.
 
 #### UI Elements
 
 - Header: "Grocery List" + subtitle
-- **Clear Completed** button (removes all `IsPurchased` items via API)
-- **Share List** button (native share sheet or clipboard copy of formatted list)
-- **Quick-add input**: text field with `+` button — add a single free-text item
-- **Items grid** (3 columns on desktop, 1 on mobile): grouped by category
-  - Each group header: icon + category name + item count badge
-  - Each item card:
-    - Checkbox (toggling `IsPurchased`)
-    - Item name + note
+- **Stores Tabs/Dropdown**: Switch between "Master List" (unassigned items) and specific stores (e.g., "ShopRite", "Costco"). New stores can be created dynamically.
+- **Master List View**:
+  - Purpose: Review all needed items, remove what's already in the pantry, and assign the remaining items to stores.
+  - Quick-add input: text field with `+` button to add single free-text items.
+  - Items grid (grouped by category):
+    - Delete button (remove if already in pantry).
+    - Store assignment dropdown (assigns item to a store list).
+    - Item display: **Item name** highlighted on the first line; amount, quantity, and note on the second line (e.g., "peanut butter" over "1/2 cup"). The system already includes parsing logic to separate amounts from item names to support this formatting.
     - Quantity stepper (−/+)
-- **Purchased Items** section at the bottom: completed items shown crossed-out in a dashed container
+- **Store List View**:
+  - **Clear Completed** button (removes all `IsPurchased` items for the current store).
+  - **Share List** button (formats current store items, invokes Web Share API or clipboard).
+  - Quick-add input: text field with `+` button to add an item directly to this store.
+  - Items grid (grouped by category):
+    - Checkbox (toggling `IsPurchased`). Checked items appear crossed off.
+    - Store assignment dropdown (allows moving the item to another store).
+    - Item display: **Item name** highlighted on the first line; amount, quantity, and note on the second line. (Supported by the aforementioned ingredient parsing logic).
+    - Quantity stepper (−/+)
 
 #### Behaviour
 
 - Load active grocery list: `GET /api/grocery`.
-- **Quick-add**: `POST /api/grocery/items` with `{ name, quantity: 1 }`. Category defaults to "Other".
+- **Quick-add**: `POST /api/grocery/items` with `{ name, quantity: 1, store }`. Category defaults to "Other".
+- **Remove item (in pantry)**: `DELETE /api/grocery/items/:itemId`.
+- **Assign/Move to store**: `PATCH /api/grocery/items/:itemId` with `{ store }` (string name of the store).
 - **Check/uncheck item**: `PATCH /api/grocery/items/:itemId` with `{ isPurchased }`.
 - **Change quantity**: `PATCH /api/grocery/items/:itemId` with `{ quantity }`.
-- **Clear Completed**: `DELETE /api/grocery/items?purchased=true`.
-- **Share List**: formats items as plain text and invokes the Web Share API or copies to clipboard.
+- **Clear Completed**: `DELETE /api/grocery/items?purchased=true&store={storeName}`.
+- **Share List**: formats the current store's items as plain text.
 
 ---
 
@@ -597,6 +608,7 @@ export interface GroceryItem {
   note?: string;
   quantity: number;
   category: string;
+  store?: string;
   isPurchased: boolean;
   sourceRecipeId?: string;
 }
