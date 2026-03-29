@@ -55,6 +55,15 @@ export async function updateItem(
   return res.json();
 }
 
+export async function removeItem(itemId: string): Promise<GroceryList> {
+  const res = await fetch(`${BASE}/items/${itemId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function clearPurchased(): Promise<GroceryList> {
   const res = await fetch(`${BASE}/items?purchased=true`, {
     method: 'DELETE',

@@ -55,10 +55,13 @@ After implementing a change, validate it using this workflow:
 
 ### Backend changes (`.Server` project)
 
-Aspire automatically hot-reloads the backend on file save. If the change does not take effect:
-1. Use _list resources_ to confirm `digitalsouschef-server` is still `Running`
-2. If it crashed, use _list console logs_ for `digitalsouschef-server` to read the error
-3. Fix the error, then use _execute resource command_ → Restart if needed
+**IMPORTANT:** Aspire's `resource-restart` does NOT recompile the server — it only re-runs the existing binary. After making backend (`.Server`) changes, always follow this sequence:
+
+1. **Stop** the server: use _execute resource command_ → `resource-stop` on `digitalsouschef-server`
+2. **Rebuild**: run `dotnet build DigitalSousChef.Server\DigitalSousChef.Server.csproj -q` from `src/DigitalSousChef/`
+3. **Start** the server: use _execute resource command_ → `resource-start` on `digitalsouschef-server`
+
+If the server crashed or won't start, use _list console logs_ for `digitalsouschef-server` to diagnose the error before retrying.
 
 ### Frontend changes (`digitalsouschef.client`)
 

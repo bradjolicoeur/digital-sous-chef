@@ -50,6 +50,15 @@ public static class GroceryEndpoints
         return list is null ? Results.NotFound() : Results.Ok(list);
     }
 
+    [WolverineDelete("/api/grocery/items/{itemId}")]
+    public static async Task<IResult> RemoveGroceryItem(
+        Guid itemId,
+        IMessageBus bus)
+    {
+        var list = await bus.InvokeAsync<GroceryList?>(new RemoveGroceryItemCommand(itemId));
+        return list is null ? Results.NotFound() : Results.Ok(list);
+    }
+
     [WolverineDelete("/api/grocery/items")]
     public static async Task<IResult> ClearPurchasedItems(
         bool purchased,

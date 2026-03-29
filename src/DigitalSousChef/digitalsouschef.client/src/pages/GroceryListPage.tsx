@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Minus, Check, Trash2, Share2, ShoppingBasket } from 'lucide-react';
+import { Plus, Minus, Check, Trash2, Share2, ShoppingBasket, X } from 'lucide-react';
 import {
   getGroceryList,
   addItem as apiAddItem,
   updateItem,
+  removeItem,
   clearPurchased,
 } from '../api/grocery';
 import type { GroceryList, GroceryItem } from '../types';
@@ -43,6 +44,12 @@ const GroceryListPage = () => {
   const handleClearPurchased = async () => {
     if (!list) return;
     const updated = await clearPurchased();
+    setList(updated);
+  };
+
+  const handleRemoveItem = async (item: GroceryItem) => {
+    if (!list) return;
+    const updated = await removeItem(item.id);
     setList(updated);
   };
 
@@ -186,6 +193,13 @@ const GroceryListPage = () => {
                     >
                       <Plus size={10} />
                     </button>
+                    <button
+                      onClick={() => handleRemoveItem(item)}
+                      className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-error hover:bg-error-container transition-colors ml-1"
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <X size={10} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -201,7 +215,7 @@ const GroceryListPage = () => {
           <div className="bg-surface-container-low rounded-3xl p-6">
             <div className="space-y-3">
               {purchasedItems.map(item => (
-                <div key={item.id} className="flex items-center gap-3 text-on-surface-variant/50">
+                <div key={item.id} className="flex items-center gap-3 text-on-surface-variant/50 group">
                   <button
                     onClick={() => handleTogglePurchased(item)}
                     className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
@@ -212,6 +226,13 @@ const GroceryListPage = () => {
                   <span className="text-xs ml-auto">
                     {item.quantity}
                   </span>
+                  <button
+                    onClick={() => handleRemoveItem(item)}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-error/50 hover:bg-error-container hover:text-on-error-container opacity-0 group-hover:opacity-100 transition-all"
+                    aria-label={`Remove ${item.name}`}
+                  >
+                    <X size={10} />
+                  </button>
                 </div>
               ))}
             </div>
