@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Plus, Info, ShoppingBasket, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getMealPlan, assignSlot, removeSlot } from '../api/planner';
 import { generateList } from '../api/grocery';
@@ -156,15 +156,20 @@ const PlannerPage = () => {
                         <div className="flex-grow flex flex-col gap-1.5">
                           {(slot.recipes ?? []).map((recipe: MealSlotRecipe) => (
                             <div key={recipe.recipeId} className="relative flex items-center gap-1.5 bg-surface-container-low rounded-lg p-1.5">
-                              {recipe.recipeImageUrl && (
-                                <img
-                                  className="w-10 h-10 object-cover rounded-md shrink-0"
-                                  src={recipe.recipeImageUrl}
-                                  alt={recipe.recipeTitle}
-                                  referrerPolicy="no-referrer"
-                                />
-                              )}
-                              <h4 className="text-[9px] font-bold line-clamp-2 flex-1">{recipe.recipeTitle}</h4>
+                              <Link
+                                to={`/recipe/${recipe.recipeId}`}
+                                className="flex items-center gap-1.5 flex-1 min-w-0"
+                              >
+                                {recipe.recipeImageUrl && (
+                                  <img
+                                    className="w-10 h-10 object-cover rounded-md shrink-0"
+                                    src={recipe.recipeImageUrl}
+                                    alt={recipe.recipeTitle}
+                                    referrerPolicy="no-referrer"
+                                  />
+                                )}
+                                <h4 className="text-[9px] font-bold line-clamp-2 flex-1">{recipe.recipeTitle}</h4>
+                              </Link>
                               <button
                                 onClick={() => handleRemoveRecipe(day.isoDate, mealType, recipe.recipeId)}
                                 className="w-4 h-4 bg-surface rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm shrink-0"
@@ -215,10 +220,15 @@ const PlannerPage = () => {
                           <span className="text-[10px] font-bold uppercase tracking-widest text-tertiary block">{mealType}</span>
                           {(slot.recipes ?? []).map((recipe: MealSlotRecipe) => (
                             <div key={recipe.recipeId} className="flex items-center gap-4">
-                              {recipe.recipeImageUrl && (
-                                <img className="w-12 h-12 object-cover rounded-xl shrink-0" src={recipe.recipeImageUrl} alt={recipe.recipeTitle} referrerPolicy="no-referrer" />
-                              )}
-                              <p className="font-medium text-sm flex-1">{recipe.recipeTitle}</p>
+                              <Link
+                                to={`/recipe/${recipe.recipeId}`}
+                                className="flex items-center gap-4 flex-1 min-w-0"
+                              >
+                                {recipe.recipeImageUrl && (
+                                  <img className="w-12 h-12 object-cover rounded-xl shrink-0" src={recipe.recipeImageUrl} alt={recipe.recipeTitle} referrerPolicy="no-referrer" />
+                                )}
+                                <p className="font-medium text-sm flex-1">{recipe.recipeTitle}</p>
+                              </Link>
                               <button onClick={() => handleRemoveRecipe(day.isoDate, mealType, recipe.recipeId)} className="p-1">
                                 <X size={14} className="text-on-surface-variant" />
                               </button>
