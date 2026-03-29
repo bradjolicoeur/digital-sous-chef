@@ -349,7 +349,7 @@ const GroceryListPage = () => {
                     </div>
 
                     {/* Line 2: amount + quantity + controls */}
-                    <div className="flex items-center gap-2 mt-0.5 ml-9">
+                    <div className="flex items-center gap-2 mt-0.5 ml-9 flex-wrap min-w-0">
                       {amount && (
                         <span className={`text-xs transition-all ${
                           activeStore !== null && item.isPurchased
@@ -371,7 +371,7 @@ const GroceryListPage = () => {
                       <select
                         value={item.store ?? ''}
                         onChange={e => handleAssignStore(item, e.target.value)}
-                        className="ml-1 text-xs text-on-surface-variant bg-transparent border-none focus:outline-none cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="ml-1 text-xs text-on-surface-variant bg-transparent border-none focus:outline-none cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity max-w-[8rem] min-w-0"
                         aria-label="Assign to store"
                       >
                         <option value="">Master List</option>
