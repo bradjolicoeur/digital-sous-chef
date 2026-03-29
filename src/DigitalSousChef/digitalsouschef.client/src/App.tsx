@@ -20,7 +20,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const { isLoggedIn } = useFusionAuth();
   const showSidebar = SIDEBAR_ROUTES.some(r => location.pathname === r || location.pathname.startsWith(r + '/'));
-  const isRecipeDetail = location.pathname.startsWith('/recipe/') || location.pathname.startsWith('/recipes/new');
+  const isRecipeEdit = location.pathname.endsWith('/edit') || location.pathname.startsWith('/recipes/new');
 
   // After FusionAuth redirects back, navigate to the originally requested page
   useEffect(() => {
@@ -34,7 +34,7 @@ function AppLayout() {
   }, [isLoggedIn, navigate]);
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface">
+    <div className="min-h-screen bg-surface text-on-surface overflow-x-hidden">
       <TopNavBar />
       <div className="flex">
         {showSidebar && (
@@ -42,7 +42,7 @@ function AppLayout() {
             <SideNavBar />
           </div>
         )}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/gallery" element={<AuthGuard><GalleryPage /></AuthGuard>} />
@@ -56,7 +56,7 @@ function AppLayout() {
           </Routes>
         </div>
       </div>
-      {!isRecipeDetail && <BottomNavBar />}
+      {!isRecipeEdit && <BottomNavBar />}
     </div>
   );
 }
