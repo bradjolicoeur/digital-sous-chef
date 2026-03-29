@@ -19,3 +19,5 @@
 - **Forward-looking tests**: The grocery list store-assignment tests reference `GroceryItem.Store` (and related command/endpoint changes) which don't exist yet. Tests will have compile errors until Rusty adds the `Store` property — this is intentional (test-first for spec 4.5).
 - **Response DTOs**: Test files define `file record` response DTOs (not sharing server domain types) for deserialization from `result.ReadAsJson<T>()`. This decouples assertions from server model evolution.
 
+📌 Team update (2026-03-29T21:15:00Z): CI/CD bootstrap complete — `.github/workflows/ci.yml` runs `dotnet test` with `continue-on-error: true` (no postgres yet). Next step: add `postgres:17` service container to `test-backend` job and remove `continue-on-error`. — decided by Livingston
+

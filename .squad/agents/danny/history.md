@@ -9,6 +9,8 @@
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
+📌 Team update (2026-03-29T21:15:00Z): CI/CD bootstrap complete — `Dockerfile.server`, `Dockerfile.client`, `nginx.conf`, `.dockerignore`, `.github/workflows/ci.yml` committed to main. Integration tests run with `continue-on-error: true` until postgres service container is wired. Image builds gate CI. — decided by Livingston
+
 ### 2026-01-31 — Grocery List Spec 4.5 Gap Analysis
 
 Conducted a full gap analysis between spec 4.5 and the current implementation of the grocery list feature. Key findings:

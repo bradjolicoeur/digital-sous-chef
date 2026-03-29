@@ -18,3 +18,5 @@
 - `clearPurchased(store?)` passes `&store=` query param so backend only clears that store's purchased items.
 - Quick-add passes `activeStore ?? undefined` so items land in the currently active tab.
 
+📌 Team update (2026-03-29T21:15:00Z): CI/CD bootstrap complete — `Dockerfile.client` uses `node:22-alpine` → `nginx:1.27-alpine`. Client image builds are gated in CI. `nginx.conf` handles SPA fallback and fingerprinted asset caching. — decided by Livingston
+

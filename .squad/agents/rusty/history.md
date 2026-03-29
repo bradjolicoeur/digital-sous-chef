@@ -10,3 +10,5 @@
 - `GroceryItem.Store` is `string?` — `null`/`""` means Master List (unassigned). Stores are implicit; no separate store entity.
 - When Aspire is running, `dotnet build` may fail due to file locks from the server process. Use `Stop-Process -Id <PID>` on the specific process ID holding the lock, then build with `--disable-build-servers`.
 - `ClearPurchasedItemsCommand` now accepts optional `string? Store` param; `null` = clear all (backwards compat).
+
+📌 Team update (2026-03-29T21:15:00Z): CI/CD bootstrap complete — `Dockerfile.server`, `Dockerfile.client`, `nginx.conf`, `.dockerignore`, `.github/workflows/ci.yml` committed to main. Backend tests run in CI with `continue-on-error: true` (no postgres service container yet). — decided by Livingston

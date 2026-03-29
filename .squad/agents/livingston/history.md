@@ -24,3 +24,31 @@
 
 ## Learnings
 _(append new entries here as work is completed)_
+
+---
+
+## 2025 — CI/CD Bootstrap
+
+### What was created
+
+| File | Purpose |
+|---|---|
+| `Dockerfile.server` | Multi-stage .NET 10 build → `aspnet:10.0` runtime, non-root user `app`, `curl` healthcheck on `/health` |
+| `Dockerfile.client` | Multi-stage Node 22 build → `nginx:1.27-alpine`, SPA fallback routing |
+| `nginx.conf` | SPA fallback, 1-year cache on fingerprinted assets, `/healthz` probe |
+| `.dockerignore` | Excludes `.git`, `node_modules`, `bin/obj`, `TestResults`, `.squad`, `.vscode` |
+| `.github/workflows/ci.yml` | Parallel jobs: `test-backend`, `build-server`, `build-client`, `ci-summary` |
+
+### Key Gotchas Discovered
+
+1. **No .sln file** — project has no solution file. Dockerfiles and CI restore individual `.csproj` files:
+   - Server restore: `DigitalSousChef.Server.csproj` (pulls in `DigitalSousChef.ServiceDefaults` transitively)
+   - Test restore: `DigitalSousChef.Tests.csproj`
+
+2. **esproj reference must be stripped in Docker** — `DigitalSousChef.Server.csproj` references `digitalsouschef.client.esproj` which uses `Microsoft.VisualStudio.JavaScript.Sdk/1.0.4338480`, a VS-internal SDK not available on public NuGet. Applied `sed` twice in `Dockerfile.server` (once before restore for cache correctness, once after the full source `COPY` overwrites the patched file). Frontend is built independently in `Dockerfile.client`.
+
+3. **No Node engine constraint in package.json** — no `engines` field. Using `node:22-alpine` (LTS); Vite 8 requires Node 18+.
+
+4. **No vite `base` URL** — `vite.config.ts` has no `base` option, so the built assets reference `/` — nginx config works without any path prefix adjustments.
+
+5. **Integration tests need PostgreSQL** — `continue-on-error: true` on the test step until a postgres service container is wired into the CI job.
