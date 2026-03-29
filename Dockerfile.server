@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+
+# ── build stage ──────────────────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy csproj files first — restore layer is cached as long as these don't change
+COPY src/DigitalSousChef/DigitalSousChef.ServiceDefaults/DigitalSousChef.ServiceDefaults.csproj \
+     DigitalSousChef.ServiceDefaults/DigitalSousChef.ServiceDefaults.csproj
+COPY src/DigitalSousChef/DigitalSousChef.Server/DigitalSousChef.Server.csproj \
+     DigitalSousChef.Server/DigitalSousChef.Server.csproj
+
+# Strip the VS-only esproj reference — Microsoft.VisualStudio.JavaScript.Sdk is
+# not on public NuGet and the frontend is built separately in Dockerfile.client
+RUN sed -i '/<ProjectReference Include=".*\.esproj"/,/<\/ProjectReference>/d' \
+    DigitalSousChef.Server/DigitalSousChef.Server.csproj
+
+RUN dotnet restore DigitalSousChef.Server/DigitalSousChef.Server.csproj
+
+# Copy full source — invalidates the layer cache only when source changes
+COPY src/DigitalSousChef/DigitalSousChef.ServiceDefaults/ DigitalSousChef.ServiceDefaults/
+COPY src/DigitalSousChef/DigitalSousChef.Server/ DigitalSousChef.Server/
+
+# Re-apply the patch: COPY above restored the original csproj from context
+RUN sed -i '/<ProjectReference Include=".*\.esproj"/,/<\/ProjectReference>/d' \
+    DigitalSousChef.Server/DigitalSousChef.Server.csproj
+
+RUN dotnet publish DigitalSousChef.Server/DigitalSousChef.Server.csproj \
+    -c Release --no-restore -o /app/publish
+
+# ── final stage ───────────────────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+
+# Install curl for the HEALTHCHECK
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN adduser --disabled-password --gecos '' app
+
+WORKDIR /app
+COPY --from=build /app/publish .
+RUN chown -R app:app /app
+
+USER app
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["dotnet", "DigitalSousChef.Server.dll"]

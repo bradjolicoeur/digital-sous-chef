@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-
+
+      - name: Restore
+        run: dotnet restore src/DigitalSousChef/DigitalSousChef.Tests/DigitalSousChef.Tests.csproj
+
+      - name: Build
+        run: dotnet build src/DigitalSousChef/DigitalSousChef.Tests/DigitalSousChef.Tests.csproj --no-restore -c Release
+
+      # Integration tests require PostgreSQL — add a postgres service container or set
+      # SKIP_INTEGRATION_TESTS=true to skip until the DB is wired up.
+      - name: Test
+        run: dotnet test src/DigitalSousChef/DigitalSousChef.Tests/DigitalSousChef.Tests.csproj --no-build -c Release --logger trx --results-directory TestResults
+        continue-on-error: true  # TODO: remove once postgres service container is configured
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/
+
+  build-server:
+    name: Build Server Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build server image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.server
+          push: false
+          tags: digital-sous-chef-server:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # TODO: Add docker/login-action + push: true when Artifact Registry is configured
+      # See: https://github.com/docker/login-action#google-artifact-registry
+
+  build-client:
+    name: Build Client Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build client image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.client
+          push: false
+          tags: digital-sous-chef-client:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [test-backend, build-server, build-client]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "Backend tests: ${{ needs.test-backend.result }}"
+          echo "Server image:  ${{ needs.build-server.result }}"
+          echo "Client image:  ${{ needs.build-client.result }}"
+          if [[ "${{ needs.build-server.result }}" == "failure" || "${{ needs.build-client.result }}" == "failure" ]]; then
+            echo "Image build failed — CI failed."
+            exit 1
+          fi
+          echo "All required checks passed."
