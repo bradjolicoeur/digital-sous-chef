@@ -46,7 +46,7 @@ public static class GroceryEndpoints
         IMessageBus bus)
     {
         var list = await bus.InvokeAsync<GroceryList?>(
-            new UpdateGroceryItemCommand(itemId, request.IsPurchased, request.Quantity));
+            new UpdateGroceryItemCommand(itemId, request.IsPurchased, request.Quantity, request.Store));
         return list is null ? Results.NotFound() : Results.Ok(list);
     }
 
@@ -62,12 +62,13 @@ public static class GroceryEndpoints
     [WolverineDelete("/api/grocery/items")]
     public static async Task<IResult> ClearPurchasedItems(
         bool purchased,
+        string? store,
         IMessageBus bus)
     {
         if (!purchased) return Results.BadRequest();
-        var list = await bus.InvokeAsync<GroceryList?>(new ClearPurchasedItemsCommand());
+        var list = await bus.InvokeAsync<GroceryList?>(new ClearPurchasedItemsCommand(store));
         return list is null ? Results.NotFound() : Results.Ok(list);
     }
 }
 
-public record UpdateGroceryItemRequest(bool? IsPurchased, int? Quantity);
+public record UpdateGroceryItemRequest(bool? IsPurchased, int? Quantity, string? Store);

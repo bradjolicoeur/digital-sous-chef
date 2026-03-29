@@ -8,3 +8,13 @@
 ## Learnings
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
+
+### 2026-01-31 — Grocery List Spec 4.5 Gap Analysis
+
+Conducted a full gap analysis between spec 4.5 and the current implementation of the grocery list feature. Key findings:
+
+- **Store is a string, not an entity.** Implicit creation on first assignment. `null`/`""` = Master List. Derive available stores from `DISTINCT Store` across items. No separate store management endpoint needed.
+- **Single PATCH endpoint is the right call.** Adding `string? Store` to the existing `UpdateGroceryItemRequest` keeps the pattern consistent and avoids endpoint proliferation.
+- **Master List view and Store List view have different per-item actions.** Master List = delete (pantry check) + store assignment. Store List = purchased checkbox + store reassignment. The UI must conditionally render based on active tab.
+- **15 discrete gaps identified** across 6 files: `GroceryList.cs`, `AddGroceryItem.cs`, `UpdateGroceryItem.cs`, `ClearPurchasedItems.cs`, `GroceryEndpoints.cs` (backend); `types.ts`, `api/grocery.ts`, `GroceryListPage.tsx` (frontend).
+- The store tab/switcher UI (GAP-9) is the structural blocker — all other frontend gaps depend on having active tab state established first.

@@ -2,7 +2,7 @@ using Marten;
 
 namespace DigitalSousChef.Server.Features.GroceryList;
 
-public record UpdateGroceryItemCommand(Guid ItemId, bool? IsPurchased, int? Quantity);
+public record UpdateGroceryItemCommand(Guid ItemId, bool? IsPurchased, int? Quantity, string? Store = null);
 
 public class UpdateGroceryItemHandler
 {
@@ -24,6 +24,7 @@ public class UpdateGroceryItemHandler
 
         if (cmd.IsPurchased.HasValue) item.IsPurchased = cmd.IsPurchased.Value;
         if (cmd.Quantity.HasValue) item.Quantity = cmd.Quantity.Value;
+        if (cmd.Store is not null) item.Store = cmd.Store;
 
         session.Store(list);
         await session.SaveChangesAsync();

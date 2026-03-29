@@ -7,4 +7,6 @@
 
 ## Learnings
 
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+- `GroceryItem.Store` is `string?` — `null`/`""` means Master List (unassigned). Stores are implicit; no separate store entity.
+- When Aspire is running, `dotnet build` may fail due to file locks from the server process. Use `Stop-Process -Id <PID>` on the specific process ID holding the lock, then build with `--disable-build-servers`.
+- `ClearPurchasedItemsCommand` now accepts optional `string? Store` param; `null` = clear all (backwards compat).

@@ -2,7 +2,7 @@ using Marten;
 
 namespace DigitalSousChef.Server.Features.GroceryList;
 
-public record AddGroceryItemCommand(string Name, int Quantity = 1);
+public record AddGroceryItemCommand(string Name, int Quantity = 1, string? Store = null);
 
 public class AddGroceryItemHandler
 {
@@ -33,7 +33,8 @@ public class AddGroceryItemHandler
             Name = cmd.Name,
             Quantity = cmd.Quantity,
             Category = "Other",
-            IsPurchased = false
+            IsPurchased = false,
+            Store = cmd.Store
         });
 
         session.Store(list);

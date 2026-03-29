@@ -2,7 +2,7 @@ using Marten;
 
 namespace DigitalSousChef.Server.Features.GroceryList;
 
-public record ClearPurchasedItemsCommand;
+public record ClearPurchasedItemsCommand(string? Store = null);
 
 public class ClearPurchasedItemsHandler
 {
@@ -19,7 +19,7 @@ public class ClearPurchasedItemsHandler
 
         if (list is null) return null;
 
-        list.Items.RemoveAll(i => i.IsPurchased);
+        list.Items.RemoveAll(i => i.IsPurchased && (cmd.Store == null || i.Store == cmd.Store));
 
         session.Store(list);
         await session.SaveChangesAsync();

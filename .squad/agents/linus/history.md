@@ -8,3 +8,13 @@
 ## Learnings
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
+
+### 2026-03-29 — Grocery Store Tabs
+- `GroceryItem.store?: string` — `null`/`""` = Master List; non-empty = named store. Stores are DERIVED from items (distinct non-empty store values), not stored separately.
+- Master List view shows only unassigned items (`!i.store`). Store view filters to `i.store === activeStore`.
+- `extraStores` local state tracks newly-created store tabs that have no items yet — merged with `assignedStores` to form `allStores`.
+- Store assignment dropdown hides (opacity-0) until group hover — keeps the UI clean per-item.
+- Share List and Clear Completed are only shown in store-view (not Master List).
+- `clearPurchased(store?)` passes `&store=` query param so backend only clears that store's purchased items.
+- Quick-add passes `activeStore ?? undefined` so items land in the currently active tab.
+

@@ -76,6 +76,7 @@ export interface GroceryItem {
   category: string;
   isPurchased: boolean;
   sourceRecipeId?: string;
+  store?: string;
 }
 
 export interface GroceryList {

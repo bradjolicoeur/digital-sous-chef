@@ -16,5 +16,6 @@ public class GroceryItem
     public int Quantity { get; set; } = 1;
     public string Category { get; set; } = "";
     public bool IsPurchased { get; set; }
+    public string? Store { get; set; }
     public Guid? SourceRecipeId { get; set; }
 }

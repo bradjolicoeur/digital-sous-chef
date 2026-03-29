@@ -19,12 +19,12 @@ export async function generateList(weekStartDate: string): Promise<GroceryList> 
   return res.json();
 }
 
-export async function addItem(name: string, quantity = 1): Promise<GroceryList> {
+export async function addItem(name: string, quantity = 1, store?: string): Promise<GroceryList> {
   const res = await fetch(`${BASE}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ name, quantity }),
+    body: JSON.stringify({ name, quantity, ...(store ? { store } : {}) }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -43,7 +43,7 @@ export async function addItemsBulk(recipeId: string): Promise<GroceryList> {
 
 export async function updateItem(
   itemId: string,
-  updates: { isPurchased?: boolean; quantity?: number }
+  updates: { isPurchased?: boolean; quantity?: number; store?: string }
 ): Promise<GroceryList> {
   const res = await fetch(`${BASE}/items/${itemId}`, {
     method: 'PATCH',
@@ -64,8 +64,11 @@ export async function removeItem(itemId: string): Promise<GroceryList> {
   return res.json();
 }
 
-export async function clearPurchased(): Promise<GroceryList> {
-  const res = await fetch(`${BASE}/items?purchased=true`, {
+export async function clearPurchased(store?: string): Promise<GroceryList> {
+  const url = store
+    ? `${BASE}/items?purchased=true&store=${encodeURIComponent(store)}`
+    : `${BASE}/items?purchased=true`;
+  const res = await fetch(url, {
     method: 'DELETE',
     credentials: 'include',
   });

@@ -5,4 +5,5 @@
   </Project>
   <Project Path="DigitalSousChef.Server/DigitalSousChef.Server.csproj" />
   <Project Path="DigitalSousChef.ServiceDefaults/DigitalSousChef.ServiceDefaults.csproj" />
+  <Project Path="DigitalSousChef.Tests/DigitalSousChef.Tests.csproj" />
 </Solution>

@@ -105,3 +105,6 @@ app.MapWolverineEndpoints(opts =>
 app.MapFallbackToFile("/index.html");
 
 await app.RunAsync();
+
+// Exposes the compiler-generated Program class to the test project via AlbaHost.For<Program>().
+public partial class Program { }
