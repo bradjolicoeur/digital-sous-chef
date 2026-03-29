@@ -16,6 +16,7 @@
 | Rusty | Backend Dev | .squad/agents/rusty/charter.md | 🟢 Active |
 | Linus | Frontend Dev | .squad/agents/linus/charter.md | 🟢 Active |
 | Basher | Tester | .squad/agents/basher/charter.md | 🟢 Active |
+| Livingston | DevOps Engineer | .squad/agents/livingston/charter.md | 🟢 Active |
 | Scribe | Scribe | .squad/agents/scribe/charter.md | 🟢 Active |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 

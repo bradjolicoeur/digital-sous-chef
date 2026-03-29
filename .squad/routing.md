@@ -10,6 +10,7 @@ How to decide who handles what.
 | .NET backend, Wolverine handlers, Marten | Rusty | API endpoints, commands, queries, projections, migrations |
 | React, TypeScript, Tailwind, UI | Linus | Components, pages, routing, API integration, styling |
 | Tests, quality, edge cases | Basher | xUnit, Alba integration tests, test scenarios |
+| Docker, CI/CD, GCP Cloud Run, GitHub Actions, infra | Livingston | Dockerfiles, workflows, deployments, Cloud SQL, Artifact Registry |
 | Session logging, decision merges | Scribe | Automatic — never needs routing |
 | Work queue, GitHub issues, backlog | Ralph | Automatic — monitor only |
 
@@ -22,6 +23,7 @@ How to decide who handles what.
 | `squad:rusty` | Backend API/handler work | Rusty |
 | `squad:linus` | Frontend UI work | Linus |
 | `squad:basher` | Testing and quality work | Basher |
+| `squad:livingston` | DevOps, infra, CI/CD, Cloud Run | Livingston |
 
 ### How Issue Assignment Works
 
