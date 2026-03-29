@@ -1,20 +1,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wand2, Loader2, CheckCircle } from 'lucide-react';
-import { importRecipe } from '../api/recipes';
+import { Wand2, Loader2, CheckCircle, Link2, FileText } from 'lucide-react';
+import { importRecipe, importRecipeFromText } from '../api/recipes';
+import { cn } from '../lib/utils';
+
+type Tab = 'url' | 'text';
 
 const RecipeImportScanner = () => {
+  const [tab, setTab] = useState<Tab>('url');
   const [url, setUrl] = useState('');
+  const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleImport = async () => {
-    if (!url.trim()) return;
     setLoading(true);
     setError('');
     try {
-      const recipe = await importRecipe(url.trim());
+      const recipe = tab === 'url'
+        ? await importRecipe(url.trim())
+        : await importRecipeFromText(text.trim());
       navigate(`/recipe/${recipe.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import recipe');
@@ -23,35 +29,80 @@ const RecipeImportScanner = () => {
     }
   };
 
+  const canSubmit = tab === 'url' ? url.trim().length > 0 : text.trim().length > 0;
+
   return (
     <div className="w-full max-w-2xl bg-surface-container-lowest p-6 lg:p-10 rounded-xl editorial-shadow border border-outline-variant/20">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-grow">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-on-surface-variant/50">
-            <span className="text-lg">🔗</span>
-          </div>
-          <input
-            className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-on-surface placeholder-on-surface-variant/40"
-            placeholder="https://your-favorite-recipe.com/dish"
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            disabled={loading}
-            onKeyDown={(e) => e.key === 'Enter' && handleImport()}
-          />
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 bg-surface-container-low rounded-full p-1">
         <button
-          onClick={handleImport}
-          disabled={loading}
-          className="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60"
+          onClick={() => setTab('url')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium transition-all',
+            tab === 'url' ? 'bg-primary text-on-primary shadow' : 'text-on-surface-variant hover:text-on-surface'
+          )}
         >
-          {loading ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
-          <span>{loading ? 'Scanning...' : 'Scan URL'}</span>
+          <Link2 size={15} /> Paste URL
+        </button>
+        <button
+          onClick={() => setTab('text')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium transition-all',
+            tab === 'text' ? 'bg-primary text-on-primary shadow' : 'text-on-surface-variant hover:text-on-surface'
+          )}
+        >
+          <FileText size={15} /> Paste Text
         </button>
       </div>
-      {error && (
-        <p className="mt-4 text-sm text-red-600">{error}</p>
+
+      {tab === 'url' ? (
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-grow">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-on-surface-variant/50">
+              <span className="text-lg">🔗</span>
+            </div>
+            <input
+              className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-on-surface placeholder-on-surface-variant/40"
+              placeholder="https://your-favorite-recipe.com/dish"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={loading}
+              onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleImport()}
+            />
+          </div>
+          <button
+            onClick={handleImport}
+            disabled={loading || !canSubmit}
+            className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60"
+          >
+            {loading ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
+            <span>{loading ? 'Scanning...' : 'Scan URL'}</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <textarea
+            className="w-full p-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-on-surface placeholder-on-surface-variant/40 resize-none font-body text-sm leading-relaxed"
+            placeholder={"Paste your recipe here...\n\nIngredients\n- 2 cups flour\n- 1 cup sugar\n\nInstructions\n1. Mix ingredients\n2. Bake at 350°F"}
+            rows={10}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            disabled={loading}
+          />
+          <button
+            onClick={handleImport}
+            disabled={loading || !canSubmit}
+            className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60 self-end"
+          >
+            {loading ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
+            <span>{loading ? 'Importing...' : 'Import Recipe'}</span>
+          </button>
+        </div>
       )}
+
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+
       <div className="mt-6 flex items-center justify-center gap-6 text-sm text-on-surface-variant/60 font-medium">
         <div className="flex items-center gap-2"><CheckCircle size={14} /> No ads</div>
         <div className="flex items-center gap-2"><CheckCircle size={14} /> Clean formatting</div>

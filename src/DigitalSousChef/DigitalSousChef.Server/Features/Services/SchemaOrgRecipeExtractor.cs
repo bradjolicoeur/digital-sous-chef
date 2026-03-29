@@ -34,4 +34,7 @@ public class SchemaOrgRecipeExtractor : IAIRecipeExtractor
 
         return RecipeHtmlParser.Parse(html, url);
     }
+
+    public Task<Recipe> ExtractFromTextAsync(string rawText) =>
+        Task.FromResult(RecipeTextParser.Parse(rawText));
 }

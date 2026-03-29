@@ -127,6 +127,9 @@ public sealed class PlaywrightRecipeExtractor : IAIRecipeExtractor, IAsyncDispos
         }
     }
 
+    public Task<Recipe> ExtractFromTextAsync(string rawText) =>
+        Task.FromResult(RecipeTextParser.Parse(rawText));
+
     public async ValueTask DisposeAsync()
     {
         if (_context is not null) await _context.DisposeAsync();

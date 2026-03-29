@@ -35,6 +35,15 @@ public static class RecipeEndpoints
         return Results.Created($"/api/recipes/{recipe.Id}", recipe);
     }
 
+    [WolverinePost("/api/recipes/import/text")]
+    public static async Task<IResult> ImportRecipeFromText(
+        ImportRecipeFromTextCommand cmd,
+        IMessageBus bus)
+    {
+        var recipe = await bus.InvokeAsync<Recipe>(cmd);
+        return Results.Created($"/api/recipes/{recipe.Id}", recipe);
+    }
+
     [WolverineGet("/api/recipes")]
     public static async Task<IResult> GetRecipes(
         string? category,

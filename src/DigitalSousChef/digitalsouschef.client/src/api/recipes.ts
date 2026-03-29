@@ -13,6 +13,17 @@ export async function importRecipe(url: string): Promise<Recipe> {
   return res.json();
 }
 
+export async function importRecipeFromText(rawText: string): Promise<Recipe> {
+  const res = await fetch(`${BASE}/import/text`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ rawText }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function getRecipes(params?: { category?: string; search?: string }): Promise<RecipeSummary[]> {
   const qs = new URLSearchParams();
   if (params?.category) qs.set('category', params.category);

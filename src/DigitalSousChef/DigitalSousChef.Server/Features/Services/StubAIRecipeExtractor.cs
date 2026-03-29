@@ -56,6 +56,9 @@ public partial class StubAIRecipeExtractor : IAIRecipeExtractor
         };
     }
 
+    public Task<Recipe> ExtractFromTextAsync(string rawText) =>
+        Task.FromResult(RecipeTextParser.Parse(rawText));
+
     [GeneratedRegex(@"<title[^>]*>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
     private static partial Regex TitleTagRegex();
 
