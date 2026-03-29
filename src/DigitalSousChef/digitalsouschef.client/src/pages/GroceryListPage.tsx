@@ -9,6 +9,29 @@ import {
 } from '../api/grocery';
 import type { GroceryList, GroceryItem } from '../types';
 
+// Splits "1.5 cups peanut butter" → { amount: "1.5 cups", ingredientName: "peanut butter" }
+function parseIngredient(name: string): { amount: string; ingredientName: string } {
+  // Match a leading number (integer, decimal, fraction, unicode fraction, or mixed like "1½" / "1 1/2")
+  const numMatch = name.match(
+    /^([¼½¾⅓⅔⅛⅜⅝⅞]|\d+[¼½¾⅓⅔⅛⅜⅝⅞]|\d+(?:[./]\d+)?(?:\s+\d+\/\d+)?(?:\s*[-–]\s*\d+(?:[./]\d+)?)?)\s+(.+)$/
+  );
+  if (!numMatch) return { amount: '', ingredientName: name };
+
+  const num = numMatch[1];
+  const rest = numMatch[2];
+
+  // Check if rest starts with a measurement unit
+  const unitMatch = rest.match(
+    /^(cups?|c\.|tablespoons?|tbsp\.?|tbs\.?|teaspoons?|tsp\.?|pounds?|lbs?\.?|ounces?|oz\.?|grams?|g\.|kilograms?|kg\.?|liters?|litres?|milliliters?|ml\.?|quarts?|qt\.?|pints?|pt\.?|gallons?|slices?|pieces?|cloves?|cans?|packages?|pkg\.?|bunches?|heads?|stalks?|sprigs?|dashes?|pinches?|handfuls?|sticks?|loaves?|links?|strips?|sheets?|drops?|bags?|jars?)\s+(.+)$/i
+  );
+
+  if (unitMatch) {
+    return { amount: `${num} ${unitMatch[1]}`, ingredientName: unitMatch[2] };
+  }
+
+  return { amount: num, ingredientName: rest };
+}
+
 const GroceryListPage = () => {
   const [list, setList] = useState<GroceryList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,10 +77,9 @@ const GroceryListPage = () => {
   };
 
   const activeItems = list?.items.filter(i => !i.isPurchased) ?? [];
-  const purchasedItems = list?.items.filter(i => i.isPurchased) ?? [];
 
-  // Group active items by category
-  const grouped = activeItems.reduce<Record<string, GroceryItem[]>>((acc, item) => {
+  // Group ALL items by category (purchased stay in place, styled differently)
+  const grouped = (list?.items ?? []).reduce<Record<string, GroceryItem[]>>((acc, item) => {
     const cat = item.category || 'Other';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
@@ -117,7 +139,6 @@ const GroceryListPage = () => {
           <h1 className="font-headline text-5xl text-on-surface tracking-tight leading-none mb-4">The Provisions</h1>
           <p className="font-headline italic text-xl text-on-surface-variant">
             {activeItems.length} item{activeItems.length !== 1 ? 's' : ''} remaining
-            {purchasedItems.length > 0 && ` · ${purchasedItems.length} purchased`}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -125,7 +146,7 @@ const GroceryListPage = () => {
             <Share2 size={14} />
             Share List
           </button>
-          {purchasedItems.length > 0 && (
+          {activeItems.length < (list?.items.length ?? 0) && (
             <button
               onClick={handleClearPurchased}
               className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-outline-variant/20 text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
@@ -165,80 +186,72 @@ const GroceryListPage = () => {
               </span>
               <span className="text-xs text-on-surface-variant">{items.length}</span>
             </div>
-            <div className="space-y-3">
-              {items.map(item => (
-                <div key={item.id} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <button
-                      onClick={() => handleTogglePurchased(item)}
-                      className="w-6 h-6 rounded-full border-2 border-outline-variant/30 flex items-center justify-center shrink-0 hover:border-primary transition-colors"
-                    >
-                      {item.isPurchased && <Check size={12} className="text-primary" />}
-                    </button>
-                    <span className="text-sm truncate">{item.name}</span>
+            <div className="space-y-4">
+              {items.map(item => {
+                const { amount, ingredientName } = parseIngredient(item.name);
+                return (
+                  <div key={item.id} className="group">
+                    {/* Line 1: checkbox + ingredient name */}
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleTogglePurchased(item)}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          item.isPurchased
+                            ? 'bg-primary/20 border-primary/40'
+                            : 'border-outline-variant/30 hover:border-primary'
+                        }`}
+                      >
+                        {item.isPurchased && <Check size={12} className="text-primary" />}
+                      </button>
+                      <span className={`text-sm font-semibold transition-all ${
+                        item.isPurchased ? 'line-through text-on-surface-variant/40' : 'text-on-surface'
+                      }`}>
+                        {ingredientName || item.name}
+                      </span>
+                    </div>
+                    {/* Line 2: amount + quantity, controls on hover */}
+                    <div className="flex items-center gap-2 mt-0.5 ml-9">
+                      {amount && (
+                        <span className={`text-xs transition-all ${
+                          item.isPurchased ? 'line-through text-on-surface-variant/30' : 'text-on-surface-variant'
+                        }`}>
+                          {amount}
+                        </span>
+                      )}
+                      <span className={`text-xs font-medium transition-all ${
+                        item.isPurchased ? 'text-on-surface-variant/30' : 'text-error/80'
+                      }`}>
+                        {item.quantity}x
+                      </span>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                        <button
+                          onClick={() => handleQuantityChange(item, -1)}
+                          className="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center"
+                        >
+                          <Minus size={9} />
+                        </button>
+                        <button
+                          onClick={() => handleQuantityChange(item, 1)}
+                          className="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center"
+                        >
+                          <Plus size={9} />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveItem(item)}
+                          className="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center text-error hover:bg-error-container transition-colors ml-1"
+                          aria-label={`Remove ${item.name}`}
+                        >
+                          <X size={9} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleQuantityChange(item, -1)}
-                      className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center"
-                    >
-                      <Minus size={10} />
-                    </button>
-                    <span className="text-xs font-medium w-8 text-center">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleQuantityChange(item, 1)}
-                      className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center"
-                    >
-                      <Plus size={10} />
-                    </button>
-                    <button
-                      onClick={() => handleRemoveItem(item)}
-                      className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-error hover:bg-error-container transition-colors ml-1"
-                      aria-label={`Remove ${item.name}`}
-                    >
-                      <X size={10} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Purchased Items */}
-      {purchasedItems.length > 0 && (
-        <section>
-          <h2 className="font-headline text-2xl italic text-on-surface-variant/60 mb-4">Purchased Items</h2>
-          <div className="bg-surface-container-low rounded-3xl p-6">
-            <div className="space-y-3">
-              {purchasedItems.map(item => (
-                <div key={item.id} className="flex items-center gap-3 text-on-surface-variant/50 group">
-                  <button
-                    onClick={() => handleTogglePurchased(item)}
-                    className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
-                  >
-                    <Check size={12} className="text-primary" />
-                  </button>
-                  <span className="text-sm line-through">{item.name}</span>
-                  <span className="text-xs ml-auto">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => handleRemoveItem(item)}
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-error/50 hover:bg-error-container hover:text-on-error-container opacity-0 group-hover:opacity-100 transition-all"
-                    aria-label={`Remove ${item.name}`}
-                  >
-                    <X size={10} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </main>
   );
 };
