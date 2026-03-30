@@ -54,6 +54,8 @@ const GalleryPage = () => {
             <Search className="text-outline" size={24} />
           </div>
           <input
+            id="recipe-search"
+            name="search"
             className="w-full pl-16 pr-8 py-5 bg-surface-container-lowest border-none rounded-full editorial-shadow focus:ring-2 focus:ring-primary-container text-lg transition-all"
             placeholder="Search recipes, ingredients, or cuisines..."
             type="text"

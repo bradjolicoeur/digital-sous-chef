@@ -159,6 +159,8 @@ const GroceryListPage = () => {
           </p>
           <div className="flex items-center gap-3 max-w-md mx-auto">
             <input
+              id="empty-state-quick-add"
+              name="quick-add"
               type="text"
               value={quickAdd}
               onChange={e => setQuickAdd(e.target.value)}
@@ -251,6 +253,8 @@ const GroceryListPage = () => {
         {showNewStoreInput ? (
           <div className="flex items-center gap-2">
             <input
+              id="new-store-name"
+              name="store-name"
               ref={newStoreInputRef}
               type="text"
               defaultValue=""
@@ -276,6 +280,8 @@ const GroceryListPage = () => {
       {/* Quick Add */}
       <div className="mb-10 flex items-center gap-3 max-w-lg">
         <input
+          id="quick-add-item"
+          name="quick-add"
           type="text"
           value={quickAdd}
           onChange={e => setQuickAdd(e.target.value)}
@@ -369,6 +375,8 @@ const GroceryListPage = () => {
 
                       {/* Store assignment dropdown */}
                       <select
+                        id={`store-select-${item.id}`}
+                        name="store-assignment"
                         value={item.store ?? ''}
                         onChange={e => handleAssignStore(item, e.target.value)}
                         className="ml-1 text-xs text-on-surface-variant bg-transparent border-none focus:outline-none cursor-pointer md:opacity-0 md:group-hover:opacity-100 transition-opacity max-w-[8rem] min-w-0"

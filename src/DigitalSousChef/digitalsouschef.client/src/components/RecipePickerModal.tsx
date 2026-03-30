@@ -40,6 +40,8 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect }: RecipePickerModalProps
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
             <input
+              id="modal-recipe-search"
+              name="search"
               className="w-full pl-12 pr-4 py-3 bg-surface-container-low rounded-full text-sm focus:ring-2 focus:ring-primary/20 border-none"
               placeholder="Search recipes..."
               value={search}

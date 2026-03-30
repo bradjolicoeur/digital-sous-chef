@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
 
 @theme {
   --font-headline: "Newsreader", serif;
@@ -36,8 +37,6 @@
 }
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
-
   body {
     @apply bg-background text-on-surface font-body;
   }
