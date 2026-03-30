@@ -20,3 +20,7 @@
 
 📌 Team update (2026-03-29T21:15:00Z): CI/CD bootstrap complete — `Dockerfile.client` uses `node:22-alpine` → `nginx:1.27-alpine`. Client image builds are gated in CI. `nginx.conf` handles SPA fallback and fingerprinted asset caching. — decided by Livingston
 
+### 2026-03-29 — Console Warnings Fixed
+- **Form field id/name attributes**: All form inputs, selects, and textareas must have `id` and `name` attributes for HTML standards compliance. Fixed 6 form fields across GroceryListPage (quick-add, store name input, store assignment dropdown), GalleryPage (search), and RecipePickerModal (search).
+- **@import rule ordering**: CSS `@import` statements MUST appear at the top of stylesheets before any other rules (except `@charset`). Moved the Google Fonts `@import url(...)` from inside the `@layer base` block to the top of `index.css` to resolve Chrome console warning "An @import rule was ignored because it wasn't defined at the top of the stylesheet".
+
