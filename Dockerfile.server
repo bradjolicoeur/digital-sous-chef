@@ -9,7 +9,7 @@ COPY src/DigitalSousChef/digitalsouschef.client/package.json \
 RUN npm ci
 
 COPY src/DigitalSousChef/digitalsouschef.client/ ./
-RUN npm run build
+RUN NODE_ENV=production npm run build
 
 # ── stage 2: build .NET server ────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
