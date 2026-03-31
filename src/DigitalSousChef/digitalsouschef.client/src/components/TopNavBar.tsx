@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, User, LogIn, LogOut } from 'lucide-react';
+import { Plus, LogIn, LogOut } from 'lucide-react';
 import { useFusionAuth } from '@fusionauth/react-sdk';
 import { cn } from '../lib/utils';
 
