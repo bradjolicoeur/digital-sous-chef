@@ -23,7 +23,8 @@
 - GitHub workflows: `.github/workflows/` (to be created)
 
 ## Learnings
-_(append new entries here as work is completed)_
+
+- **2026-03-31: Single-image deployment model** — Deployment is now a single Docker image. `Dockerfile.server` builds the React/Vite frontend in a `node-build` stage and copies the `/app/dist` output into `/app/publish/wwwroot` after `dotnet publish`. ASP.NET Core serves the SPA via `UseDefaultFiles`/`UseStaticFiles`/`MapFallbackToFile`. The separate `Dockerfile.client` (nginx) is retained for reference but is no longer the deployment artifact. The `build-client` CI job has been removed. Rusty updated Program.cs to use `UseStaticFiles()` instead of `MapStaticAssets()` to support Docker-copied wwwroot files. (Decision 2026-03-31 accepted.)
 
 ---
 

@@ -25,6 +25,28 @@
 
 ---
 
+### 2026-03-31: Single-Image Deployment Model (Livingston)
+
+**By:** Livingston  
+**Status:** Accepted
+
+**What:**
+
+The deployment artifact is now a single Docker image built from `Dockerfile.server`. The React/Vite frontend is compiled in a `node-build` stage (`node:22-alpine`) and the resulting `dist/` output is copied into `wwwroot/` of the published .NET application. ASP.NET Core serves the SPA statically.
+
+| Change | Detail |
+|--------|--------|
+| `Dockerfile.server` | Three-stage build: `node-build` → `build` → `final`. React dist copied to `wwwroot` after `dotnet publish`. |
+| `Dockerfile.client` | Retained for reference; no longer the deployment artifact. |
+| `ci.yml` | Removed `build-client` job. `ci-summary` now depends only on `test-backend` and `build-server`. |
+| `Program.cs` | Replaced `MapStaticAssets()` with `UseStaticFiles()` to support Docker-copied wwwroot files. |
+
+**Why:** Eliminates the two-container model (API + nginx SPA) and the operational complexity of coordinating them in production (Cloud Run revisions, URL routing, CORS). ASP.NET Core already calls `UseDefaultFiles()`, `UseStaticFiles()`, and `MapFallbackToFile("/index.html")` — wwwroot serving was already wired up. Vite config uses `/api/*` relative paths, which resolve correctly when frontend and API share the same origin. Reduces CI time: one Docker build instead of two; GHA layer cache (`type=gha,mode=max`) covers the npm install and dotnet restore layers independently.
+
+**Trade-offs:** Image is larger than a pure nginx image (includes ASP.NET Core runtime + static assets). Node build happens inside Docker — no separate npm caching in CI outside of BuildKit's layer cache. `Dockerfile.client` is orphaned but kept for reference in case a CDN-fronted static deployment is ever desired.
+
+---
+
 ### 2026-01-31: Grocery List Store Assignment — Architecture (Danny)
 
 **By:** Danny  
