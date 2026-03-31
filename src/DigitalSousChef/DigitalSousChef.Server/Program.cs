@@ -83,7 +83,7 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 
 app.UseDefaultFiles();
-app.MapStaticAssets();
+app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
