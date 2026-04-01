@@ -56,13 +56,13 @@ When deploying to a hosted environment (e.g., GCP Cloud Run), the FusionAuth con
 
 ### Backend environment variables
 
-Set these on the Cloud Run service:
+These are set on the Cloud Run service by the CI/CD pipeline from GitHub repository secrets:
 
-| Variable | Description | Local default |
-|----------|-------------|---------------|
-| `FusionAuth__Issuer` | Base URL of the FusionAuth instance | `http://localhost:53374` |
-| `FusionAuth__ClientId` | FusionAuth application client ID | `e9fdb985-9173-4e01-9d73-ac2d60d1dc8e` |
-| `ConnectionStrings__marten` | PostgreSQL connection string | Aspire-managed Postgres |
+| Cloud Run env var | GitHub secret | Description | Local default |
+|-------------------|---------------|-------------|---------------|
+| `FusionAuth__Issuer` | `OIDCAUTHORITY` | Base URL of the FusionAuth instance | `http://localhost:53374` |
+| `FusionAuth__ClientId` | `OIDC_CLIENTID` | FusionAuth application client ID | `e9fdb985-9173-4e01-9d73-ac2d60d1dc8e` |
+| `ConnectionStrings__marten` | `DATABASE_CONNECTION` | PostgreSQL connection string | Aspire-managed Postgres |
 
 > The double-underscore (`__`) is the .NET environment variable separator for nested config keys (equivalent to `FusionAuth:ClientId` in `appsettings.json`).
 
