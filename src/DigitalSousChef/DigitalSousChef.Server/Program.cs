@@ -16,6 +16,9 @@ var fusionAuthIssuer = builder.Configuration["services:fusionauth-app:http:0"]
     ?? builder.Configuration["FusionAuth:Issuer"]
     ?? "http://localhost:53374";
 
+var fusionAuthClientId = builder.Configuration["FusionAuth:ClientId"]
+    ?? "e9fdb985-9173-4e01-9d73-ac2d60d1dc8e";
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
@@ -23,7 +26,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         // fetch OIDC discovery metadata and use the issuer FusionAuth reports there.
         // This avoids hardcoding the issuer and survives port changes.
         opts.Authority = fusionAuthIssuer;
-        opts.Audience = "e9fdb985-9173-4e01-9d73-ac2d60d1dc8e";
+        opts.Audience = fusionAuthClientId;
         opts.RequireHttpsMetadata = false; // dev only — FusionAuth on HTTP
         // Read access token from the app.at cookie (set by the FusionAuth helper routes)
         opts.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
@@ -94,7 +97,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // FusionAuth helper routes required by the React SDK
-var fusionAuthClientId = "e9fdb985-9173-4e01-9d73-ac2d60d1dc8e";
 app.MapFusionAuthHelperRoutes(fusionAuthIssuer, fusionAuthClientId);
 
 app.MapWolverineEndpoints(opts =>

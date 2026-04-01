@@ -97,6 +97,8 @@ jobs:
           file: Dockerfile.server
           # Push only on main — PRs validate the build without publishing
           push: ${{ github.event_name == 'push' }}
+          build-args: |
+            FUSIONAUTH_CLIENT_ID=${{ vars.FUSIONAUTH_CLIENT_ID }}
           tags: |
             us-east1-docker.pkg.dev/bradjolicoeur-web/digital-sous-chef/digital-sous-chef:${{ github.sha }}
             us-east1-docker.pkg.dev/bradjolicoeur-web/digital-sous-chef/digital-sous-chef:latest

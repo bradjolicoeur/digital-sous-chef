@@ -9,6 +9,8 @@ COPY src/DigitalSousChef/digitalsouschef.client/package.json \
 RUN npm ci
 
 COPY src/DigitalSousChef/digitalsouschef.client/ ./
+
+ARG FUSIONAUTH_CLIENT_ID
 RUN NODE_ENV=production npm run build
 
 # ── stage 2: build .NET server ────────────────────────────────────────────────

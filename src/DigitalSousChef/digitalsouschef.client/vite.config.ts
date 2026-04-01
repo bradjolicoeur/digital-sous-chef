@@ -12,6 +12,7 @@ const isProduction = env.NODE_ENV === 'production';
 
 const target = env["services__digitalsouschef-server__https__0"] ?? 'https://localhost:7062';
 const fusionAuthUrl = env["services__fusionauth-app__http__0"] ?? 'http://localhost:53374';
+const fusionAuthClientId = env["FUSIONAUTH_CLIENT_ID"] ?? 'e9fdb985-9173-4e01-9d73-ac2d60d1dc8e';
 
 // Dev-only: set up HTTPS certificate for local Aspire development
 let httpsConfig: { key: Buffer; cert: Buffer } | undefined;
@@ -54,6 +55,7 @@ export default defineConfig({
     plugins: [plugin(), tailwindcss()],
     define: {
         __FUSIONAUTH_URL__: JSON.stringify(fusionAuthUrl),
+        __FUSIONAUTH_CLIENT_ID__: JSON.stringify(fusionAuthClientId),
     },
     resolve: {
         alias: {

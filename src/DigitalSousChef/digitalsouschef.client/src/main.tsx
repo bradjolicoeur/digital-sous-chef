@@ -6,12 +6,13 @@ import './index.css'
 import App from './App.tsx'
 
 declare const __FUSIONAUTH_URL__: string;
+declare const __FUSIONAUTH_CLIENT_ID__: string;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <FusionAuthProvider
-        clientId="e9fdb985-9173-4e01-9d73-ac2d60d1dc8e"
+        clientId={__FUSIONAUTH_CLIENT_ID__}
         serverUrl={window.location.origin}
         redirectUri={window.location.origin}
         postLogoutRedirectUri={window.location.origin}
