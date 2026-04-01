@@ -74,16 +74,7 @@ The React build bakes configuration in via Vite's `define` substitution. Pass th
 |----------|-------------|---------------|
 | `FUSIONAUTH_CLIENT_ID` | FusionAuth application client ID | `e9fdb985-9173-4e01-9d73-ac2d60d1dc8e` |
 
-The Docker build already sets `NODE_ENV=production`. Add the client ID as a build arg:
-
-```bash
-docker build \
-  --build-arg FUSIONAUTH_CLIENT_ID=<your-client-id> \
-  -f Dockerfile.server \
-  -t digital-sous-chef .
-```
-
-In GitHub Actions, add it as a repository variable and pass it via the build step.
+The Docker build already sets `NODE_ENV=production`. The `OIDC_CLIENTID` repository secret is passed automatically by the CI pipeline as a build arg — no manual step needed.
 
 > **Note:** The FusionAuth URL is not baked into the frontend. The React SDK communicates through the backend's `/app/login` and `/app/logout` helper routes (same origin), so no cross-origin URL is needed in production.
 

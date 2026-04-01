@@ -98,7 +98,7 @@ jobs:
           # Push only on main — PRs validate the build without publishing
           push: ${{ github.event_name == 'push' }}
           build-args: |
-            FUSIONAUTH_CLIENT_ID=${{ vars.FUSIONAUTH_CLIENT_ID }}
+            FUSIONAUTH_CLIENT_ID=${{ secrets.OIDC_CLIENTID }}
           tags: |
             us-east1-docker.pkg.dev/bradjolicoeur-web/digital-sous-chef/digital-sous-chef:${{ github.sha }}
             us-east1-docker.pkg.dev/bradjolicoeur-web/digital-sous-chef/digital-sous-chef:latest
@@ -128,5 +128,6 @@ jobs:
           env_vars: |
             ConnectionStrings__marten=${{ secrets.DATABASE_CONNECTION }}
             FusionAuth__Issuer=${{ secrets.OIDCAUTHORITY }}
+            FusionAuth__ClientId=${{ secrets.OIDC_CLIENTID }}
             ASPNETCORE_ENVIRONMENT=Production
           flags: --port=8080 --allow-unauthenticated
