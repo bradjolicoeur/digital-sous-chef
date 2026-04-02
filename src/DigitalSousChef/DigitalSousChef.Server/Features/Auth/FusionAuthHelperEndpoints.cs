@@ -54,21 +54,30 @@ public static class FusionAuthHelperEndpoints
             [FromQuery] string? code,
             [FromQuery] string? error,
             [FromQuery] string? error_description,
-            IHttpClientFactory httpClientFactory) =>
+            IHttpClientFactory httpClientFactory,
+            ILogger<Program> logger) =>
         {
             var postLoginRedirect = ctx.Request.Cookies[PostLoginRedirectCookie] ?? "/";
 
             if (!string.IsNullOrEmpty(error) || string.IsNullOrEmpty(code))
             {
                 var errorMsg = error_description ?? error ?? "Unknown error";
+                logger.LogWarning("OAuth callback received error from FusionAuth: {Error} — {Description}", error, error_description);
                 return Results.Redirect($"{postLoginRedirect}?error={Uri.EscapeDataString(errorMsg)}");
             }
 
             var codeVerifier = ctx.Request.Cookies[PkceVerifierCookie];
             if (string.IsNullOrEmpty(codeVerifier))
+            {
+                logger.LogWarning("OAuth callback: PKCE verifier cookie '{CookieName}' not found. Available cookies: {Cookies}",
+                    PkceVerifierCookie,
+                    string.Join(", ", ctx.Request.Cookies.Keys));
                 return Results.Redirect($"{postLoginRedirect}?error=missing_pkce_verifier");
+            }
 
             var callbackUrl = $"{DetermineBrowserOrigin(ctx, null)}/app/callback";
+            logger.LogInformation("OAuth callback: exchanging code. redirect_uri={CallbackUrl}, fusionAuthBase={FusionAuthBase}",
+                callbackUrl, fusionAuthBaseUrl);
 
             // Exchange code for tokens
             var http = httpClientFactory.CreateClient();
@@ -88,13 +97,19 @@ public static class FusionAuthHelperEndpoints
                     $"{fusionAuthBaseUrl}/oauth2/token",
                     new FormUrlEncodedContent(tokenRequest));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex, "OAuth callback: HTTP request to FusionAuth token endpoint failed. URL={TokenUrl}", $"{fusionAuthBaseUrl}/oauth2/token");
                 return Results.Redirect($"{postLoginRedirect}?error=token_exchange_failed");
             }
 
             if (!tokenResponse.IsSuccessStatusCode)
+            {
+                var body = await tokenResponse.Content.ReadAsStringAsync();
+                logger.LogError("OAuth callback: FusionAuth token exchange failed. Status={Status}, Body={Body}, CallbackUrl={CallbackUrl}",
+                    (int)tokenResponse.StatusCode, body, callbackUrl);
                 return Results.Redirect($"{postLoginRedirect}?error=token_exchange_failed");
+            }
 
             var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
             using var tokenDoc = JsonDocument.Parse(tokenJson);
