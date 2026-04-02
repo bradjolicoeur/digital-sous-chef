@@ -110,10 +110,17 @@ public static class FusionAuthHelperEndpoints
 
             // Set auth cookies
             var atExp = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToUnixTimeSeconds();
-            var secureCookieOpts = new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Path = "/" };
+            var isHttps = ctx.Request.Scheme == "https" || ctx.Request.Headers["X-Forwarded-Proto"] == "https";
+            var secureCookieOpts = new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                Secure = isHttps
+            };
             ctx.Response.Cookies.Append(AccessTokenCookie, accessToken, secureCookieOpts);
             ctx.Response.Cookies.Append(AccessTokenExpCookie, atExp.ToString(),
-                new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax, Path = "/" }); // JS-readable
+                new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax, Path = "/", Secure = isHttps }); // JS-readable
 
             if (!string.IsNullOrEmpty(refreshToken))
                 ctx.Response.Cookies.Append(RefreshTokenCookie, refreshToken, secureCookieOpts);
@@ -184,10 +191,17 @@ public static class FusionAuthHelperEndpoints
             var expiresIn = root.TryGetProperty("expires_in", out var exp) ? exp.GetInt64() : 3600;
             var atExp = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToUnixTimeSeconds();
 
-            var secureCookieOpts = new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Path = "/" };
+            var isHttps = ctx.Request.Scheme == "https" || ctx.Request.Headers["X-Forwarded-Proto"] == "https";
+            var secureCookieOpts = new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                Secure = isHttps
+            };
             ctx.Response.Cookies.Append(AccessTokenCookie, accessToken, secureCookieOpts);
             ctx.Response.Cookies.Append(AccessTokenExpCookie, atExp.ToString(),
-                new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax, Path = "/" });
+                new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax, Path = "/", Secure = isHttps });
 
             if (root.TryGetProperty("refresh_token", out var newRt))
                 ctx.Response.Cookies.Append(RefreshTokenCookie, newRt.GetString()!, secureCookieOpts);

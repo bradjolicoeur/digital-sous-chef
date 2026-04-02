@@ -3,6 +3,7 @@ using DigitalSousChef.Server.Features.Recipes;
 using DigitalSousChef.Server.Features.Services;
 using Marten;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Wolverine;
 using Wolverine.Http;
 using Wolverine.Marten;
@@ -10,6 +11,14 @@ using Wolverine.Marten;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Configure forwarded headers for Cloud Run (TLS termination at the load balancer)
+builder.Services.Configure<ForwardedHeadersOptions>(opts =>
+{
+    opts.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    opts.KnownNetworks.Clear();
+    opts.KnownProxies.Clear();
+});
 
 // Authentication
 var fusionAuthIssuer = builder.Configuration["services:fusionauth-app:http:0"]
@@ -41,6 +50,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
                 return Task.CompletedTask;
             },
+            OnAuthenticationFailed = ctx =>
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ctx.Exception,
+                    "JWT authentication failed. Token present: {HasToken}, Authority: {Authority}, Exception: {Message}",
+                    !string.IsNullOrEmpty(ctx.Request.Cookies["app.at"]),
+                    fusionAuthIssuer,
+                    ctx.Exception.Message);
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -84,6 +103,9 @@ builder.Services.ConfigureHttpJsonOptions(opts =>
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+// Trust forwarded headers from Cloud Run's load balancer
+app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
