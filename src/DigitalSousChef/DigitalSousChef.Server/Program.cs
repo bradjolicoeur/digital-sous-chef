@@ -37,6 +37,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         opts.Authority = fusionAuthIssuer;
         opts.Audience = fusionAuthClientId;
         opts.RequireHttpsMetadata = false; // dev only — FusionAuth on HTTP
+        
+        var validIssuer = builder.Configuration["FusionAuth:ValidIssuer"];
+        if (!string.IsNullOrEmpty(validIssuer))
+        {
+            opts.TokenValidationParameters.ValidIssuers = new[] { fusionAuthIssuer, validIssuer };
+        }
+
         // Read access token from the app.at cookie (set by the FusionAuth helper routes)
         opts.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
         {
