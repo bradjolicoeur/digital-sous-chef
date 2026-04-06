@@ -54,6 +54,7 @@ public static class FusionAuthHelperEndpoints
             [FromQuery] string? code,
             [FromQuery] string? error,
             [FromQuery] string? error_description,
+            IConfiguration configuration,
             IHttpClientFactory httpClientFactory,
             ILogger<Program> logger) =>
         {
@@ -89,6 +90,14 @@ public static class FusionAuthHelperEndpoints
                 ["code_verifier"] = codeVerifier,
                 ["redirect_uri"] = callbackUrl
             };
+
+            // Check if there's a client secret configured (if not using a public client)
+            var clientSecret = configuration["FusionAuth:ClientSecret"];
+            if (!string.IsNullOrEmpty(clientSecret))
+            {
+                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+                http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
+            }
 
             HttpResponseMessage tokenResponse;
             try
