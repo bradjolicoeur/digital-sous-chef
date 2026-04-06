@@ -78,6 +78,10 @@ builder.Host.UseWolverine(opts =>
 {
     opts.Policies.AutoApplyTransactions();
     opts.Policies.UseDurableLocalQueues();
+    
+    // Cloud Run instances can't form a cluster for leader election,
+    // so we set the durability mode to Solo to manage the outbox locally per instance.
+    opts.Durability.Mode = DurabilityMode.Solo;
 });
 builder.Services.AddWolverineHttp();
 
