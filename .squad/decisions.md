@@ -83,6 +83,27 @@ The deployment artifact is now a single Docker image built from `Dockerfile.serv
 
 ---
 
+### 2026-04-09: Playwright Chromium Pre-Install for Cloud Run (Livingston & Rusty)
+
+**By:** Livingston & Rusty  
+**Status:** Accepted
+
+**What:**
+
+Cloud Run's read-only filesystem caused `/api/recipes/import` to fail with 500 errors when `PlaywrightRecipeExtractor.cs` attempted to download Chromium at runtime. Solution: pre-bake Chromium into the Docker image at build time.
+
+| Change | Detail |
+|--------|--------|
+| `Dockerfile.server` build stage | Install PowerShell; set `PLAYWRIGHT_BROWSERS_PATH=/app/playwright-browsers`; run `pwsh playwright.ps1 install chromium` to pre-download Chromium |
+| `Dockerfile.server` final stage | Add Chromium system deps (libnss3, libnspr4, libatk1.0-0, libatk-bridge2.0-0, libcups2, libdrm2, libgbm1, libgtk-3-0, libxkbcommon0, libxcomposite1, libxdamage1, libxfixes3, libxrandr2, libx11-xcb1, libasound2); copy browser from build stage to `/app/.playwright-browsers`; set `ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright-browsers` |
+| `PlaywrightRecipeExtractor.cs` | Guard runtime `install` call with `PLAYWRIGHT_BROWSERS_PATH` check; only download locally when env var is unset; add `--disable-gpu` launch arg for containerised environments |
+
+**Why:** Build-time installation eliminates runtime browser downloads (solves 27-second timeouts). Environment variable guard preserves local dev experience. Selective Chromium install keeps image ~200MB smaller than Playwright base image. No runtime filesystem writes required — compatible with Cloud Run's read-only root.
+
+**Trade-offs:** PowerShell is only in build stage (kept lean), but requires apt install. Browser version pinned to bundled Microsoft.Playwright version; upgrades automatically on next Docker build.
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

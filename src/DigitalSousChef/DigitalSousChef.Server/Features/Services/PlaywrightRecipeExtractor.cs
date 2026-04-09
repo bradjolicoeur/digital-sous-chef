@@ -24,8 +24,10 @@ public sealed class PlaywrightRecipeExtractor : IAIRecipeExtractor, IAsyncDispos
         {
             if (_context is not null) return _context;
 
-            // Install browser binaries on first run (no-op when already installed).
-            Microsoft.Playwright.Program.Main(["install", "chromium"]);
+            // In containerised deployments PLAYWRIGHT_BROWSERS_PATH is pre-populated by the Docker image.
+            // Only download browsers on demand when running locally without a pre-baked browser cache.
+            if (Environment.GetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH") is null)
+                Microsoft.Playwright.Program.Main(["install", "chromium"]);
 
             _playwright = await Playwright.CreateAsync();
             _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -36,6 +38,7 @@ public sealed class PlaywrightRecipeExtractor : IAIRecipeExtractor, IAsyncDispos
                     "--no-sandbox",
                     "--disable-setuid-sandbox",
                     "--disable-dev-shm-usage",
+                    "--disable-gpu",
                 ],
             });
 

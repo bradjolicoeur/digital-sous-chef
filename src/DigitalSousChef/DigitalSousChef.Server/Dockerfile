@@ -35,4 +35,16 @@ RUN dotnet publish "./DigitalSousChef.Server.csproj" -c $BUILD_CONFIGURATION -o 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Install dependencies required by Playwright (Chromium)
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libglib2.0-0 libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+        libdrm2 libdbus-1-3 libxcb1 libxkbcommon0 libx11-6 libx11-xcb1 libxcb-dri3-0 \
+        libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 \
+        libcairo2 libasound2 libxshmfence1 libexpat1 && \
+    rm -rf /var/lib/apt/lists/*
+USER $APP_UID
+
 ENTRYPOINT ["dotnet", "DigitalSousChef.Server.dll"]
