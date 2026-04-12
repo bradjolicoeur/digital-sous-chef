@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wand2, Loader2, CheckCircle, Link2, FileText } from 'lucide-react';
+import { Wand2, Loader2, CheckCircle, Link2, FileText, LogIn } from 'lucide-react';
+import { useFusionAuth } from '@fusionauth/react-sdk';
 import { importRecipe, importRecipeFromText } from '../api/recipes';
 import { cn } from '../lib/utils';
 
+const PENDING_IMPORT_KEY = 'pendingImport';
+
 type Tab = 'url' | 'text';
+
+interface PendingImport {
+  tab: Tab;
+  value: string;
+}
 
 const RecipeImportScanner = () => {
   const [tab, setTab] = useState<Tab>('url');
@@ -13,8 +21,44 @@ const RecipeImportScanner = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { isLoggedIn, startLogin } = useFusionAuth();
+
+  // Restore and auto-submit a pending import saved before login redirect
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const raw = sessionStorage.getItem(PENDING_IMPORT_KEY);
+    if (!raw) return;
+    sessionStorage.removeItem(PENDING_IMPORT_KEY);
+    try {
+      const pending: PendingImport = JSON.parse(raw);
+      setTab(pending.tab);
+      if (pending.tab === 'url') setUrl(pending.value);
+      else setText(pending.value);
+      // Auto-trigger import after state settles
+      const value = pending.value.trim();
+      if (!value) return;
+      setLoading(true);
+      setError('');
+      const importFn = pending.tab === 'url'
+        ? importRecipe(value)
+        : importRecipeFromText(value);
+      importFn
+        .then(recipe => navigate(`/recipe/${recipe.id}`))
+        .catch(err => setError(err instanceof Error ? err.message : 'Failed to import recipe'))
+        .finally(() => setLoading(false));
+    } catch {
+      // Malformed session data — ignore
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleImport = async () => {
+    if (!isLoggedIn) {
+      const value = tab === 'url' ? url : text;
+      sessionStorage.setItem(PENDING_IMPORT_KEY, JSON.stringify({ tab, value }));
+      sessionStorage.setItem('postLoginRedirect', '/');
+      startLogin();
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -76,8 +120,8 @@ const RecipeImportScanner = () => {
             disabled={loading || !canSubmit}
             className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60"
           >
-            {loading ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
-            <span>{loading ? 'Scanning...' : 'Scan URL'}</span>
+            {loading ? <Loader2 size={20} className="animate-spin" /> : isLoggedIn ? <Wand2 size={20} /> : <LogIn size={20} />}
+            <span>{loading ? 'Scanning...' : isLoggedIn ? 'Scan URL' : 'Sign in to Import'}</span>
           </button>
         </div>
       ) : (
@@ -95,8 +139,8 @@ const RecipeImportScanner = () => {
             disabled={loading || !canSubmit}
             className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60 self-end"
           >
-            {loading ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
-            <span>{loading ? 'Importing...' : 'Import Recipe'}</span>
+            {loading ? <Loader2 size={20} className="animate-spin" /> : isLoggedIn ? <Wand2 size={20} /> : <LogIn size={20} />}
+            <span>{loading ? 'Importing...' : isLoggedIn ? 'Import Recipe' : 'Sign in to Import'}</span>
           </button>
         </div>
       )}
