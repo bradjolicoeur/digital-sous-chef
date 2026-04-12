@@ -147,7 +147,17 @@ public static class FusionAuthHelperEndpoints
                 new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax, Path = "/", Secure = isHttps }); // JS-readable
 
             if (!string.IsNullOrEmpty(refreshToken))
+            {
                 ctx.Response.Cookies.Append(RefreshTokenCookie, refreshToken, secureCookieOpts);
+                logger.LogInformation("OAuth callback: refresh token received and stored. Access token expires in {ExpiresIn}s.", expiresIn);
+            }
+            else
+            {
+                logger.LogWarning("OAuth callback: FusionAuth did not return a refresh token. " +
+                    "Auto-refresh will fail — check FusionAuth application settings: " +
+                    "Tokens tab → 'Generate Refresh Tokens' must be enabled, and access token lifetime " +
+                    "on the JWT tab should be ≥3600s to avoid constant refresh cycles.");
+            }
 
             return Results.Redirect(postLoginRedirect);
         }).AllowAnonymous();
@@ -183,11 +193,16 @@ public static class FusionAuthHelperEndpoints
         }).AllowAnonymous();
 
         // POST /app/refresh — refresh the access token using the refresh token cookie
-        app.MapPost("/app/refresh", async (HttpContext ctx, IHttpClientFactory httpClientFactory) =>
+        app.MapPost("/app/refresh", async (HttpContext ctx, IHttpClientFactory httpClientFactory, ILogger<Program> logger) =>
         {
             var refreshToken = ctx.Request.Cookies[RefreshTokenCookie];
             if (string.IsNullOrEmpty(refreshToken))
+            {
+                logger.LogWarning("Token refresh attempted but no refresh token cookie ({CookieName}) was present. " +
+                    "Verify that FusionAuth application has 'Generate Refresh Tokens' enabled and that the " +
+                    "'offline_access' scope is allowed.", RefreshTokenCookie);
                 return Results.Unauthorized();
+            }
 
             var http = httpClientFactory.CreateClient();
             var refreshRequest = new Dictionary<string, string>
@@ -203,6 +218,14 @@ public static class FusionAuthHelperEndpoints
 
             if (!response.IsSuccessStatusCode)
             {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                logger.LogWarning(
+                    "Token refresh failed. FusionAuth returned {Status}. Body: {Body}. " +
+                    "Common causes: (1) access token lifetime too short in FusionAuth app settings, " +
+                    "(2) refresh token expired, (3) refresh token reuse violation. " +
+                    "Check FusionAuth application → JWT tab (increase access token expiry to ≥3600s) " +
+                    "and Tokens tab (ensure Generate Refresh Tokens is enabled).",
+                    (int)response.StatusCode, errorBody);
                 ClearAuthCookies(ctx);
                 return Results.Unauthorized();
             }
