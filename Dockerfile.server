@@ -44,13 +44,12 @@ RUN dotnet publish DigitalSousChef.Server/DigitalSousChef.Server.csproj \
 # Embed the React build into wwwroot — served as static files by ASP.NET Core
 COPY --from=node-build /app/dist /app/publish/wwwroot
 
-# Install PowerShell and pre-install Playwright Chromium browser
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends powershell \
-    && rm -rf /var/lib/apt/lists/*
-
+# Pre-install Playwright Chromium browser using the Node.js binary bundled by the Playwright .NET package
 ENV PLAYWRIGHT_BROWSERS_PATH=/app/playwright-browsers
-RUN cd /app/publish && pwsh playwright.ps1 install chromium
+RUN cd /app/publish && \
+    .playwright/node/linux-x64/node \
+    .playwright/node/linux-x64/node_modules/playwright-core/cli.js \
+    install chromium
 
 # ── stage 3: final runtime image ──────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
