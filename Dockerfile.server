@@ -13,7 +13,13 @@ COPY src/DigitalSousChef/digitalsouschef.client/ ./
 ARG FUSIONAUTH_CLIENT_ID
 RUN NODE_ENV=production npm run build
 
-# ── stage 2: build .NET server ────────────────────────────────────────────────
+# ── stage 2: download Playwright Chromium (Debian/glibc — matches final image) ─
+FROM node:22-slim AS playwright-browsers
+ENV PLAYWRIGHT_BROWSERS_PATH=/playwright-browsers
+# Install system deps needed by Playwright's install script, then download Chromium
+RUN npx -y playwright@1.58.0 install chromium
+
+# ── stage 3: build .NET server ────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -44,14 +50,7 @@ RUN dotnet publish DigitalSousChef.Server/DigitalSousChef.Server.csproj \
 # Embed the React build into wwwroot — served as static files by ASP.NET Core
 COPY --from=node-build /app/dist /app/publish/wwwroot
 
-# Pre-install Playwright Chromium browser using the Node.js binary bundled by the Playwright .NET package
-ENV PLAYWRIGHT_BROWSERS_PATH=/app/playwright-browsers
-RUN cd /app/publish && \
-    .playwright/node/linux-x64/node \
-    .playwright/node/linux-x64/node_modules/playwright-core/cli.js \
-    install chromium
-
-# ── stage 3: final runtime image ──────────────────────────────────────────────
+# ── stage 4: final runtime image ──────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 # Install curl for the HEALTHCHECK and Chromium system dependencies
@@ -63,7 +62,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 
 WORKDIR /app
 COPY --from=build /app/publish .
-COPY --from=build /app/playwright-browsers /app/.playwright-browsers
+COPY --from=playwright-browsers /playwright-browsers /app/.playwright-browsers
 ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright-browsers
 RUN chown -R app:app /app
 
